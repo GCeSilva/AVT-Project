@@ -167,8 +167,8 @@
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\mesh.frag" />
-    <None Include="shaders\mesh.vert" />
+    <None Include="shaders\mesh_phong.frag" />
+    <None Include="shaders\mesh_phong.vert" />
     <None Include="shaders\ttf.frag" />
     <None Include="shaders\ttf.vert" />
   </ItemGroup>
