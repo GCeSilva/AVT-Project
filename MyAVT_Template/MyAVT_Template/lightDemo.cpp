@@ -72,24 +72,6 @@ float coneDir[4] = { 0.0f, -0.0f, -1.0f, 0.0f };
 
 bool fontLoaded = false;
 
-/// ::::::::::::::::::::::::::::::::::::::::::::::::CALLBACK FUNCIONS:::::::::::::::::::::::::::::::::::::::::::::::::://///
-
-void timer(int value)
-{
-	std::ostringstream oss;
-	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")";
-	std::string s = oss.str();
-	glutSetWindow(WindowHandle);
-	glutSetWindowTitle(s.c_str());
-    FrameCount = 0;
-    glutTimerFunc(1000, timer, 0);
-}
-
-void refresh(int value)
-{
-	//PUT YOUR CODE HERE
-}
-
 // ------------------------------------------------------------
 //
 // Reshape Callback Function
@@ -164,11 +146,48 @@ void renderSim(void) {
 	renderer.renderMesh(data);
 	mu.popMatrix(gmu::MODEL);
 
+	// Extra cube 
+	mu.pushMatrix(gmu::MODEL);
+	mu.translate(gmu::MODEL, 0.0f, 0.0f, 0.0f);
+	mu.scale(gmu::MODEL, 30.0f, 3.0f, 3.0f);
+	mu.translate(gmu::MODEL, -0.5f, -0.5f, -5.0f); //centrar o cubo na origem
+
+	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
+	mu.computeNormalMatrix3x3();
+	
+	data.meshID = 0;
+	data.texMode = 1; //modulate diffuse color with texel color
+	data.vm = mu.get(gmu::VIEW_MODEL),
+	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
+	data.normal = mu.getNormalMatrix();
+	renderer.renderMesh(data);
+	mu.popMatrix(gmu::MODEL);
+	//Extra cube ends here 
+	
+	// Extra pawn (alpha version)
+	mu.pushMatrix(gmu::MODEL);
+	mu.translate(gmu::MODEL, 0.0f, 0.0f, 0.0f);
+	mu.scale(gmu::MODEL, 3.0f, 3.0f, 3.0f);
+	mu.translate(gmu::MODEL, -2.5f, -0.5f, -2.5f); //centrar o cubo na origem
+
+	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
+	mu.computeNormalMatrix3x3();
+
+	data.meshID = 1;
+	data.texMode = 1; //modulate diffuse color with texel color
+	data.vm = mu.get(gmu::VIEW_MODEL),
+	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
+	data.normal = mu.getNormalMatrix();
+	renderer.renderMesh(data);
+	mu.popMatrix(gmu::MODEL);
+	//Extra pawn ends here 
+
+
 	//Draw the other objects
 	int objId = 0; //id of the current object mesh - to be used as index of the array Mymeshes in the renderer object
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 4; ++j) {
-			mu.pushMatrix(gmu::MODEL);
+			mu.pushMatrix(gmu::MODEL); 
 			mu.translate(gmu::MODEL, (float)i * 3.7f, 0.0f, (float)j * 3.7f);
 
 			mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
@@ -217,7 +236,6 @@ void renderSim(void) {
 	
 	glutSwapBuffers();
 }
-
 // ------------------------------------------------------------
 //
 // Events from the Keyboard
@@ -454,6 +472,25 @@ void buildScene()
 	camY = r * sin(beta * 3.14f / 180.0f);
 }
 
+/// ::::::::::::::::::::::::::::::::::::::::::::::::CALLBACK FUNCIONS:::::::::::::::::::::::::::::::::::::::::::::::::://///
+
+void timer(int value)
+{
+	std::ostringstream oss;
+	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")";
+	std::string s = oss.str();
+	glutSetWindow(WindowHandle);
+	glutSetWindowTitle(s.c_str());
+	FrameCount = 0;
+	glutTimerFunc(1000, timer, 0); //ms, chama a funcao timer, valor irrelevante
+}
+
+void refresh(int value)
+{
+	renderSim();
+	glutTimerFunc(1000 / 60, refresh, 0);
+}
+
 // ------------------------------------------------------------
 //
 // Main function
@@ -478,8 +515,8 @@ int main(int argc, char **argv) {
 	glutReshapeFunc(changeSize);
 
 	glutTimerFunc(0, timer, 0);
-	glutIdleFunc(renderSim);  // Use it for maximum performance
-	//glutTimerFunc(0, refresh, 0);    //use it to to get 60 FPS whatever
+	//glutIdleFunc(renderSim);  // Use it for maximum performance
+	glutTimerFunc(1000/60, refresh, 0);    //use it to to get 60 FPS whatever
 
 //	Mouse and Keyboard Callbacks
 	glutKeyboardFunc(processKeys);
