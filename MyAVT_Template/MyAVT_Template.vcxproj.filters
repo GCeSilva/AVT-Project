@@ -47,10 +47,10 @@
     <None Include="shaders\mesh_phong.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="C:\Users\gonca\Downloads\mesh_gouraud.frag">
+    <None Include="shaders\mesh_gouraud.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="C:\Users\gonca\Downloads\mesh_gouraud.vert">
+    <None Include="shaders\mesh_gouraud.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
