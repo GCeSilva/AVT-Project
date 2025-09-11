@@ -553,7 +553,7 @@ int main(int argc, char **argv) {
 
 	buildScene();
 
-	if(!renderer.setRenderMeshesShaderProg("shaders/mesh.vert", "shaders/mesh.frag") || 
+	if(!renderer.setRenderMeshesShaderProg("shaders/mesh_gouraud.vert", "shaders/mesh_gouraud.frag") || 
 		!renderer.setRenderTextShaderProg("shaders/ttf.vert", "shaders/ttf.frag"))
 	return(1);
 
