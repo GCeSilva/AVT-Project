@@ -26,11 +26,11 @@
 
 #include <IL/il.h>
 
-#include "renderer.h"
 #include "shader.h"
 #include "mathUtility.h"
 #include "model.h"
 #include "texture.h"
+#include "auxRender.h"
 
 using namespace std;
 
@@ -43,7 +43,7 @@ unsigned int FrameCount = 0;
 //File with the font
 const string fontPathFile = "fonts/arial.ttf";
 
-//Object of class gmu (Graphics Math Utility) to manage math and matrix operations
+////Object of class gmu (Graphics Math Utility) to manage math and matrix operations
 gmu mu;
 
 //Object of class renderer to manage the rendering of meshes and ttf-based bitmap text
@@ -127,39 +127,22 @@ void renderSim(void) {
 	renderer.setSpotLightMode(spotlight_mode);
 	renderer.setSpotParam(coneDir, 0.93);
 
-	dataMesh data;
+	instantiate(0, 0, meshTransformations[FLOOR]);  //render the big plane
 
-	mu.pushMatrix(gmu::MODEL);
-	mu.rotate(gmu::MODEL, -90.0f, 1.0f, 0.0f, 0.0f);
-	mu.scale(gmu::MODEL, 1000.0f, 1000.0f, 1.0f);
+	for (int i = 0; i < 50; i++) {
+		for (int j = 0; j < 50; j++) {
+			Transformations cubeTrans{
+				new Translation{ *meshTransformations[CUBE].translation },
+				meshTransformations[CUBE].scale,
+				meshTransformations[CUBE].rotation
+			}; // start with initial position, scale, rotation
 
-	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
-	mu.computeNormalMatrix3x3();
-	
-	data.meshID = 1;
-	data.texMode = 0;
-	data.vm = mu.get(gmu::VIEW_MODEL);
-	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
-	data.normal = mu.getNormalMatrix();
+			(*cubeTrans.translation)[0] += i * 2.0f;
+			(*cubeTrans.translation)[1] += 0.0f; 
+			(*cubeTrans.translation)[2] += j * 2.0f;
 
-	renderer.renderMesh(data);
-	mu.popMatrix(gmu::MODEL);
-
-	for(int i = 0; i < 50; i++) {
-		mu.pushMatrix(gmu::MODEL);
-		mu.translate(gmu::MODEL, -0.5f, 0.0f, -0.5f);
-
-		mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
-		mu.computeNormalMatrix3x3();
-
-		data.meshID = 0;
-		data.texMode = 0;
-		data.vm = mu.get(gmu::VIEW_MODEL);
-		data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
-		data.normal = mu.getNormalMatrix();
-
-		renderer.renderMesh(data);
-		mu.popMatrix(gmu::MODEL);
+			instantiate(1, 0, cubeTrans); // assuming meshID 1 is CUBE, texID 0
+		}
 	}
 	
 	//Render text (bitmap fonts) in screen coordinates. So use ortoghonal projection with viewport coordinates.
@@ -339,89 +322,14 @@ void buildScene()
 
 	//Scene geometry with triangle meshes
 
-	MyMesh amesh;
-
-	float amb[] = { 0.2f, 0.15f, 0.1f, 1.0f };
-	float diff[] = { 0.8f, 0.6f, 0.4f, 1.0f };
-	float spec[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-
-	float amb1[] = { 0.3f, 0.0f, 0.0f, 1.0f };
-	float diff1[] = { 0.8f, 0.1f, 0.1f, 1.0f };
-	float spec1[] = { 0.3f, 0.3f, 0.3f, 1.0f };
-
-	float emissive[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	float shininess = 100.0f;
-	int texcount = 0;
-
-	// create geometry and VAO of the cube
-	amesh = createCube();
-	memcpy(amesh.mat.ambient, amb1, 4 * sizeof(float));
-	memcpy(amesh.mat.diffuse, diff1, 4 * sizeof(float));
-	memcpy(amesh.mat.specular, spec1, 4 * sizeof(float));
-	memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	amesh.mat.shininess = shininess;
-	amesh.mat.texCount = texcount;
-	renderer.myMeshes.push_back(amesh);
-
-	// create geometry and VAO of the cube
-	amesh = createQuad(1.0f, 1.0f);
-	memcpy(amesh.mat.ambient, amb1, 4 * sizeof(float));
-	memcpy(amesh.mat.diffuse, diff1, 4 * sizeof(float));
-	memcpy(amesh.mat.specular, spec1, 4 * sizeof(float));
-	memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	amesh.mat.shininess = shininess;
-	amesh.mat.texCount = texcount;
-	renderer.myMeshes.push_back(amesh);
-
-	// create geometry and VAO of the pawn
-	//amesh = createPawn();
-	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	//amesh.mat.shininess = shininess;
-	//amesh.mat.texCount = texcount;
-	//renderer.myMeshes.push_back(amesh);
-
-	//// create geometry and VAO of the sphere
-	//amesh = createSphere(1.0f, 20);
-	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	//amesh.mat.shininess = shininess;
-	//amesh.mat.texCount = texcount;
-	//renderer.myMeshes.push_back(amesh);
-
-	//// create geometry and VAO of the cylinder
-	//amesh = createCylinder(1.5f, 0.5f, 20);
-	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	//amesh.mat.shininess = shininess;
-	//amesh.mat.texCount = texcount;
-	//renderer.myMeshes.push_back(amesh);
-
-	//// create geometry and VAO of the cone
-	//amesh = createCone(2.5f, 1.2f, 20);
-	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	//amesh.mat.shininess = shininess;
-	//amesh.mat.texCount = texcount;
-	//renderer.myMeshes.push_back(amesh);
-
-	//// create geometry and VAO of the torus
-	//amesh = createTorus(0.5f, 1.5f, 20, 20);
-	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	//amesh.mat.shininess = shininess;
-	//amesh.mat.texCount = texcount;
-	//renderer.myMeshes.push_back(amesh);
+	createGeometry(
+		meshCreators[FLOOR](),
+		meshMaterials[FLOOR]
+	);
+	createGeometry(
+		meshCreators[CUBE](),
+		meshMaterials[CUBE]
+	);
 
 	//The truetypeInit creates a texture object in TexObjArray for storing the fontAtlasTexture
 	

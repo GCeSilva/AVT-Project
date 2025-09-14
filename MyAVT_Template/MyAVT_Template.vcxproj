@@ -159,6 +159,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="auxRender.cpp" />
     <ClCompile Include="basic_geometry.cpp" />
     <ClCompile Include="lightDemo.cpp" />
     <ClCompile Include="mathUtility.cpp" />
@@ -175,6 +176,7 @@
     <None Include="shaders\ttf.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="auxRender.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="mathUtility.h" />
     <ClInclude Include="model.h" />
