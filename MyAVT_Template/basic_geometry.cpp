@@ -459,7 +459,7 @@ float *circularProfile(float minAngle, float maxAngle, float radius, int divisio
 	return p;
 }
 
-void	ComputeTangentArray(int vertexCount, float *vertex, float *normal, float *texcoord, GLuint indexesCount, GLuint *faceIndex, float *tangent) {
+void ComputeTangentArray(int vertexCount, float *vertex, float *normal, float *texcoord, GLuint indexesCount, GLuint *faceIndex, float *tangent) {
 
 	GLuint iV0, iV1, iV2;
 	GLuint tV0, tV1, tV2;

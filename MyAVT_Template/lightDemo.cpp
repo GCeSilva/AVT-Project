@@ -128,111 +128,68 @@ void renderSim(void) {
 	renderer.setSpotParam(coneDir, 0.93);
 
 	dataMesh data;
-	
-	// Draw the floor - myMeshes[0] contains the cube object
+
 	mu.pushMatrix(gmu::MODEL);
-	mu.translate(gmu::MODEL, 0.0f, -1.15f, 0.0f);
-	mu.scale(gmu::MODEL, 30.0f, 0.1f, 30.0f);
-	mu.translate(gmu::MODEL, -0.5f, -0.5f, -0.5f); //centrar o cubo na origem
-
-	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
-	mu.computeNormalMatrix3x3();
-
-	data.meshID = 0;
-	data.texMode = 1; //modulate diffuse color with texel color
-	data.vm = mu.get(gmu::VIEW_MODEL),
-	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
-	data.normal = mu.getNormalMatrix();
-	renderer.renderMesh(data);
-	mu.popMatrix(gmu::MODEL);
-
-	// Extra cube 
-	mu.pushMatrix(gmu::MODEL);
-	mu.translate(gmu::MODEL, 0.0f, 0.0f, 0.0f);
-	mu.scale(gmu::MODEL, 30.0f, 3.0f, 3.0f);
-	mu.translate(gmu::MODEL, -0.5f, -0.5f, -5.0f); //centrar o cubo na origem
+	mu.rotate(gmu::MODEL, -90.0f, 1.0f, 0.0f, 0.0f);
+	mu.scale(gmu::MODEL, 1000.0f, 1000.0f, 1.0f);
 
 	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
 	mu.computeNormalMatrix3x3();
 	
-	data.meshID = 0;
-	data.texMode = 1; //modulate diffuse color with texel color
-	data.vm = mu.get(gmu::VIEW_MODEL),
-	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
-	data.normal = mu.getNormalMatrix();
-	renderer.renderMesh(data);
-	mu.popMatrix(gmu::MODEL);
-	//Extra cube ends here 
-	
-	// Extra pawn (alpha version)
-	mu.pushMatrix(gmu::MODEL);
-	mu.translate(gmu::MODEL, 0.0f, 0.0f, 0.0f);
-	mu.scale(gmu::MODEL, 3.0f, 3.0f, 3.0f);
-	mu.translate(gmu::MODEL, -2.5f, -0.5f, -2.5f); //centrar o cubo na origem
-
-	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
-	mu.computeNormalMatrix3x3();
-
 	data.meshID = 1;
-	data.texMode = 1; //modulate diffuse color with texel color
-	data.vm = mu.get(gmu::VIEW_MODEL),
+	data.texMode = 0;
+	data.vm = mu.get(gmu::VIEW_MODEL);
 	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
 	data.normal = mu.getNormalMatrix();
+
 	renderer.renderMesh(data);
 	mu.popMatrix(gmu::MODEL);
-	//Extra pawn ends here 
 
+	for(int i = 0; i < 50; i++) {
+		mu.pushMatrix(gmu::MODEL);
+		mu.translate(gmu::MODEL, -0.5f, 0.0f, -0.5f);
 
-	//Draw the other objects
-	int objId = 0; //id of the current object mesh - to be used as index of the array Mymeshes in the renderer object
-	for (int i = 0; i < 4; ++i) {
-		for (int j = 0; j < 4; ++j) {
-			mu.pushMatrix(gmu::MODEL); 
-			mu.translate(gmu::MODEL, (float)i * 3.7f, 0.0f, (float)j * 3.7f);
+		mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
+		mu.computeNormalMatrix3x3();
 
-			mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
-			mu.computeNormalMatrix3x3();
+		data.meshID = 0;
+		data.texMode = 0;
+		data.vm = mu.get(gmu::VIEW_MODEL);
+		data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
+		data.normal = mu.getNormalMatrix();
 
-			data.meshID = objId;
-			data.texMode = i;   //0:no texturing; 1:modulate diffuse color with texel color; 2:diffuse color is replaced by texel color; 3: multitexturing
-			data.vm = mu.get(gmu::VIEW_MODEL),
-			data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
-			data.normal = mu.getNormalMatrix();
-			renderer.renderMesh(data);
-
-			mu.popMatrix(gmu::MODEL);
-			objId = (objId + 1) % 6;
-		}
+		renderer.renderMesh(data);
+		mu.popMatrix(gmu::MODEL);
 	}
-
+	
 	//Render text (bitmap fonts) in screen coordinates. So use ortoghonal projection with viewport coordinates.
 	//Each glyph quad texture needs just one byte color channel: 0 in background and 1 for the actual character pixels. Use it for alpha blending
 	//text to be rendered in last place to be in front of everything
 	
-	if(fontLoaded) {
-		glDisable(GL_DEPTH_TEST);
-		TextCommand textCmd = { "AVT 2025 Welcome:\nGood Luck!", {100, 200}, 0.5 };
-		//the glyph contains transparent background colors and non-transparent for the actual character pixels. So we use the blending
-		glEnable(GL_BLEND);  
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		int m_viewport[4];
-		glGetIntegerv(GL_VIEWPORT, m_viewport);
+	//if(fontLoaded) {
+	//	glDisable(GL_DEPTH_TEST);
+	//	TextCommand textCmd = { "AVT 2025 Welcome:\nGood Luck!", {100, 200}, 0.5 };
+	//	//the glyph contains transparent background colors and non-transparent for the actual character pixels. So we use the blending
+	//	glEnable(GL_BLEND);  
+	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//	int m_viewport[4];
+	//	glGetIntegerv(GL_VIEWPORT, m_viewport);
 
-		//viewer at origin looking down at  negative z direction
+	//	//viewer at origin looking down at  negative z direction
 
-		mu.loadIdentity(gmu::MODEL);
-		mu.loadIdentity(gmu::VIEW);
-		mu.pushMatrix(gmu::PROJECTION);
-		mu.loadIdentity(gmu::PROJECTION);
-		mu.ortho(m_viewport[0], m_viewport[0] + m_viewport[2] - 1, m_viewport[1], m_viewport[1] + m_viewport[3] - 1, -1, 1);
-		mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
-		textCmd.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
-		renderer.renderText(textCmd);
-		mu.popMatrix(gmu::PROJECTION);
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		
-	}
+	//	mu.loadIdentity(gmu::MODEL);
+	//	mu.loadIdentity(gmu::VIEW);
+	//	mu.pushMatrix(gmu::PROJECTION);
+	//	mu.loadIdentity(gmu::PROJECTION);
+	//	mu.ortho(m_viewport[0], m_viewport[0] + m_viewport[2] - 1, m_viewport[1], m_viewport[1] + m_viewport[3] - 1, -1, 1);
+	//	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
+	//	textCmd.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
+	//	renderer.renderText(textCmd);
+	//	mu.popMatrix(gmu::PROJECTION);
+	//	glDisable(GL_BLEND);
+	//	glEnable(GL_DEPTH_TEST);
+	//	
+	//}
 	
 	glutSwapBuffers();
 }
@@ -356,7 +313,7 @@ void processMouseMotion(int xx, int yy)
 
 void mouseWheel(int wheel, int direction, int x, int y) {
 
-	r += direction * 0.1f;
+	r += direction * 1.0f;
 	if (r < 0.1f)
 		r = 0.1f;
 
@@ -406,55 +363,65 @@ void buildScene()
 	amesh.mat.texCount = texcount;
 	renderer.myMeshes.push_back(amesh);
 
+	// create geometry and VAO of the cube
+	amesh = createQuad(1.0f, 1.0f);
+	memcpy(amesh.mat.ambient, amb1, 4 * sizeof(float));
+	memcpy(amesh.mat.diffuse, diff1, 4 * sizeof(float));
+	memcpy(amesh.mat.specular, spec1, 4 * sizeof(float));
+	memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
+	amesh.mat.shininess = shininess;
+	amesh.mat.texCount = texcount;
+	renderer.myMeshes.push_back(amesh);
+
 	// create geometry and VAO of the pawn
-	amesh = createPawn();
-	memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	amesh.mat.shininess = shininess;
-	amesh.mat.texCount = texcount;
-	renderer.myMeshes.push_back(amesh);
+	//amesh = createPawn();
+	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
+	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
+	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
+	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
+	//amesh.mat.shininess = shininess;
+	//amesh.mat.texCount = texcount;
+	//renderer.myMeshes.push_back(amesh);
 
-	// create geometry and VAO of the sphere
-	amesh = createSphere(1.0f, 20);
-	memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	amesh.mat.shininess = shininess;
-	amesh.mat.texCount = texcount;
-	renderer.myMeshes.push_back(amesh);
+	//// create geometry and VAO of the sphere
+	//amesh = createSphere(1.0f, 20);
+	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
+	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
+	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
+	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
+	//amesh.mat.shininess = shininess;
+	//amesh.mat.texCount = texcount;
+	//renderer.myMeshes.push_back(amesh);
 
-	// create geometry and VAO of the cylinder
-	amesh = createCylinder(1.5f, 0.5f, 20);
-	memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	amesh.mat.shininess = shininess;
-	amesh.mat.texCount = texcount;
-	renderer.myMeshes.push_back(amesh);
+	//// create geometry and VAO of the cylinder
+	//amesh = createCylinder(1.5f, 0.5f, 20);
+	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
+	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
+	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
+	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
+	//amesh.mat.shininess = shininess;
+	//amesh.mat.texCount = texcount;
+	//renderer.myMeshes.push_back(amesh);
 
-	// create geometry and VAO of the cone
-	amesh = createCone(2.5f, 1.2f, 20);
-	memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	amesh.mat.shininess = shininess;
-	amesh.mat.texCount = texcount;
-	renderer.myMeshes.push_back(amesh);
+	//// create geometry and VAO of the cone
+	//amesh = createCone(2.5f, 1.2f, 20);
+	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
+	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
+	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
+	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
+	//amesh.mat.shininess = shininess;
+	//amesh.mat.texCount = texcount;
+	//renderer.myMeshes.push_back(amesh);
 
-	// create geometry and VAO of the torus
-	amesh = createTorus(0.5f, 1.5f, 20, 20);
-	memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
-	memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
-	memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
-	memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
-	amesh.mat.shininess = shininess;
-	amesh.mat.texCount = texcount;
-	renderer.myMeshes.push_back(amesh);
+	//// create geometry and VAO of the torus
+	//amesh = createTorus(0.5f, 1.5f, 20, 20);
+	//memcpy(amesh.mat.ambient, amb, 4 * sizeof(float));
+	//memcpy(amesh.mat.diffuse, diff, 4 * sizeof(float));
+	//memcpy(amesh.mat.specular, spec, 4 * sizeof(float));
+	//memcpy(amesh.mat.emissive, emissive, 4 * sizeof(float));
+	//amesh.mat.shininess = shininess;
+	//amesh.mat.texCount = texcount;
+	//renderer.myMeshes.push_back(amesh);
 
 	//The truetypeInit creates a texture object in TexObjArray for storing the fontAtlasTexture
 	
@@ -536,7 +503,7 @@ int main(int argc, char **argv) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(3.0f/255.0f, 252.0f/255.0f, 252.0f/255.0f, 1.0f);
 
 	printf ("Vendor: %s\n", glGetString (GL_VENDOR));
 	printf ("Renderer: %s\n", glGetString (GL_RENDERER));
@@ -553,7 +520,7 @@ int main(int argc, char **argv) {
 
 	buildScene();
 
-	if(!renderer.setRenderMeshesShaderProg("shaders/mesh_gouraud.vert", "shaders/mesh_gouraud.frag") || 
+	if(!renderer.setRenderMeshesShaderProg("shaders/mesh_phong.vert", "shaders/mesh_phong.frag") || 
 		!renderer.setRenderTextShaderProg("shaders/ttf.vert", "shaders/ttf.frag"))
 	return(1);
 
