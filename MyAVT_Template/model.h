@@ -23,7 +23,7 @@ struct MyMesh {
 		GLuint numIndexes;
 		unsigned int type;
 		struct Material mat;
-	};
+};
 
 MyMesh createCube();
 MyMesh createQuad(float size_x, float size_y);

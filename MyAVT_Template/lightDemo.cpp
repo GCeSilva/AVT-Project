@@ -27,10 +27,8 @@
 #include <IL/il.h>
 
 #include "shader.h"
-#include "mathUtility.h"
-#include "model.h"
 #include "texture.h"
-#include "auxRender.h"
+#include "SceneGraph.h"
 
 using namespace std;
 
@@ -48,6 +46,10 @@ gmu mu;
 
 //Object of class renderer to manage the rendering of meshes and ttf-based bitmap text
 Renderer renderer;
+
+SceneGraph sg;
+SceneGraph::Node* testNode;
+SceneGraph::Node* testNode1;
 	
 // Camera Position
 float camX, camY, camZ;
@@ -111,8 +113,9 @@ void renderSim(void) {
 	renderer.setTexUnit(2, 2);
 
 	// load identity matrices
-	mu.loadIdentity(gmu::VIEW);
-	mu.loadIdentity(gmu::MODEL);
+	/*mu.loadIdentity(gmu::VIEW);
+	mu.loadIdentity(gmu::MODEL);*/
+	sg.InitializeSceneGraph();
 	// set the camera using a function similar to gluLookAt
 	mu.lookAt(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
 
@@ -127,23 +130,36 @@ void renderSim(void) {
 	renderer.setSpotLightMode(spotlight_mode);
 	renderer.setSpotParam(coneDir, 0.93);
 
-	instantiate(0, 0, meshTransformations[FLOOR]);  //render the big plane
+	// fun test time
+	float t;
+	t = glutGet(GLUT_ELAPSED_TIME);
+	float r = 5.0f, gamma = 0.01f, epsylon = 0.05f;
 
-	for (int i = 0; i < 50; i++) {
-		for (int j = 0; j < 50; j++) {
-			Transformations cubeTrans{
-				new Translation{ *meshTransformations[CUBE].translation },
-				meshTransformations[CUBE].scale,
-				meshTransformations[CUBE].rotation
-			}; // start with initial position, scale, rotation
-
-			(*cubeTrans.translation)[0] += i * 2.0f;
-			(*cubeTrans.translation)[1] += 0.0f; 
-			(*cubeTrans.translation)[2] += j * 2.0f;
-
-			instantiate(1, 0, cubeTrans); // assuming meshID 1 is CUBE, texID 0
+	testNode->localTransform = Transform{
+		new Translation{
+			cos(t * gamma), 
+			10.0f, 
+			sin(t * gamma)
+		},
+		new Scale{
+			r * sin(t * gamma * 0.1f) * cos(t * epsylon * 0.1f),
+			r * sin(t * gamma * 0.1f) * sin(t * epsylon * 0.1f),
+			r * cos(t * gamma * 0.1f)
+		},
+		new Rotation{
+			360 * sin(t * gamma),
+			360 * sin(t * gamma),
+			360 * sin(t * gamma)
 		}
-	}
+	};
+
+	testNode1->UpdateLocalTransform(Transform{
+		nullptr,
+		nullptr,
+		new Rotation{1.0f, 0.0f, 1.0f, 0.0f}
+	});
+
+	sg.DrawScene();
 	
 	//Render text (bitmap fonts) in screen coordinates. So use ortoghonal projection with viewport coordinates.
 	//Each glyph quad texture needs just one byte color channel: 0 in background and 1 for the actual character pixels. Use it for alpha blending
@@ -296,7 +312,7 @@ void processMouseMotion(int xx, int yy)
 
 void mouseWheel(int wheel, int direction, int x, int y) {
 
-	r += direction * 1.0f;
+	r -= direction * 1.0f;
 	if (r < 0.1f)
 		r = 0.1f;
 
@@ -323,13 +339,23 @@ void buildScene()
 	//Scene geometry with triangle meshes
 
 	createGeometry(
-		meshCreators[FLOOR](),
-		meshMaterials[FLOOR]
+		meshCreators[QUAD](),
+		meshMaterials[DEFAULT]
 	);
 	createGeometry(
 		meshCreators[CUBE](),
-		meshMaterials[CUBE]
+		meshMaterials[DEFAULT]
 	);
+
+	sg.AddNode(QUAD, 0, objectTransforms[FLOOR]);
+	testNode = sg.AddNode(CUBE, 2, objectTransforms[BUILDING]);
+	SceneGraph::Node* test = sg.AddNode(CUBE, 3, objectTransforms[BUILDING], testNode);
+	test->localTransform = Transform{
+		new Translation{0.0f, 0.0f, 2.0f},
+		nullptr,
+		nullptr
+	};
+	testNode1 = sg.AddNode(CUBE, 3, objectTransforms[BUILDING]);
 
 	//The truetypeInit creates a texture object in TexObjArray for storing the fontAtlasTexture
 	

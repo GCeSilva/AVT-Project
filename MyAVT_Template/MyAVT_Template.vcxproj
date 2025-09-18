@@ -159,11 +159,11 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="auxRender.cpp" />
     <ClCompile Include="basic_geometry.cpp" />
     <ClCompile Include="lightDemo.cpp" />
     <ClCompile Include="mathUtility.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
@@ -176,11 +176,11 @@
     <None Include="shaders\ttf.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="auxRender.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="mathUtility.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stb_rect_pack.h" />
     <ClInclude Include="stb_truetype.h" />
