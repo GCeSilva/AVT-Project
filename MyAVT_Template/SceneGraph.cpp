@@ -94,5 +94,10 @@ std::unordered_map<Objects, Transform> objectTransforms = {
 		new Translation{0.0f, 0.5f, 0.0f},
 		new Scale{ 2.0f, 5.0f, 2.0f},
 		nullptr
-	}}
+	}},
+	{ DRONEBODY, {
+		new Translation{ 0.0f, 3.0f, 0.0f},
+		new Scale{ 1.0f, 0.4f, 0.6f },
+		nullptr
+	}},
 };

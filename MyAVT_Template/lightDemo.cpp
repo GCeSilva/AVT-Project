@@ -48,6 +48,7 @@ gmu mu;
 Renderer renderer;
 
 SceneGraph sg;
+SceneGraph::Node* drone;
 	
 // Camera Position
 float camX, camY, camZ;
@@ -129,6 +130,14 @@ void renderSim(void) {
 	renderer.setSpotParam(coneDir, 0.93);
 
 	//put real time transforms here
+	for each(SceneGraph::Node* child in drone->GetChildren())
+	{
+		child->UpdateLocalTransform(Transform{
+			nullptr,
+			nullptr,
+			new Rotation{ 5.0f, 0.0f, 1.0f, 0.0f }
+		});
+	}
 
 	sg.DrawScene();
 	
@@ -327,7 +336,7 @@ void buildScene()
 	float pdb = 0.5f; //10% of the building size
 	float dbb = 5.0f;
 	int blockSize = 5;
-	SceneGraph::Node* building;
+	SceneGraph::Node* tmpNode;
 
 	//sorry not sorry
 	for (int x = domainX[0]; x <= domainX[1]; x++) {
@@ -339,29 +348,53 @@ void buildScene()
 			for (int i = 0; i < blockSize; i++) {
 				for (int j = 0; j < blockSize; j++) {
 
-					 building = sg.AddNode(CUBE, 2, objectTransforms[BUILDING]);
+					tmpNode = sg.AddNode(CUBE, 2, objectTransforms[BUILDING]);
 
-					 building->UpdateLocalTransform(Transform{
-						 new Translation{
-							//this one between blocks
-							((float)x * (dbb + (*objectTransforms[BUILDING].scale)[0] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * pdb)) +
-							//this one between buildings
-							((float)i * ((*objectTransforms[BUILDING].scale)[0] + (*objectTransforms[BUILDING].scale)[0] * pdb)) * (x / -x),
+					tmpNode->UpdateLocalTransform(Transform{
+						new Translation{
+						//this one between blocks
+						((float)x * (dbb + (*objectTransforms[BUILDING].scale)[0] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * pdb)) +
+						//this one between buildings
+						((float)i * ((*objectTransforms[BUILDING].scale)[0] + (*objectTransforms[BUILDING].scale)[0] * pdb)) * (x / -x),
 
-							0.0f,
+						0.0f,
 
-							((float)y * (dbb + (*objectTransforms[BUILDING].scale)[2] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * pdb)) +
-							((float)j * ((*objectTransforms[BUILDING].scale)[2] + (*objectTransforms[BUILDING].scale)[2] * pdb)) * (x / -x)
-						 },
-						 nullptr,
-						 nullptr
-						 });
+						((float)y * (dbb + (*objectTransforms[BUILDING].scale)[2] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * pdb)) +
+						((float)j * ((*objectTransforms[BUILDING].scale)[2] + (*objectTransforms[BUILDING].scale)[2] * pdb)) * (x / -x)
+						},
+						nullptr,
+						nullptr
+						}
+					);
 
 				}
 			}
 
 		}
 	}
+
+	//drone
+	drone = sg.AddNode(CUBE, 3, objectTransforms[DRONEBODY]);
+	sg.AddNode(CUBE, 3, Transform{
+		new Translation{1.0f, 1.0f, 1.0f},
+		new Scale{0.2f, 0.2f, 0.2f},
+		nullptr
+	}, drone);
+	sg.AddNode(CUBE, 3, Transform{
+		new Translation{1.0f, 1.0f, -1.0f},
+		new Scale{0.2f, 0.2f, 0.2f},
+		nullptr
+	}, drone);
+	sg.AddNode(CUBE, 3, Transform{
+		new Translation{-1.0f, 1.0f, 1.0f},
+		new Scale{0.2f, 0.2f, 0.2f},
+		nullptr
+	}, drone);
+	sg.AddNode(CUBE, 3, Transform{
+		new Translation{-1.0f, 1.0f, -1.0f},
+		new Scale{0.2f, 0.2f, 0.2f},
+		nullptr
+	}, drone);
 
 	//The truetypeInit creates a texture object in TexObjArray for storing the fontAtlasTexture
 	

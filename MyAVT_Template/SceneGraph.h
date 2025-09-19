@@ -108,7 +108,8 @@ extern std::unordered_map<Mesh, std::function<MyMesh()>> meshCreators;
 // list of pre set objects
 enum Objects {
 	FLOOR,
-	BUILDING
+	BUILDING,
+	DRONEBODY
 };
 extern std::unordered_map<Objects, Transform> objectTransforms;
 
