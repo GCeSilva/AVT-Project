@@ -92,7 +92,7 @@ std::unordered_map<Objects, Transform> objectTransforms = {
 	}},
 	{ BUILDING, {
 		new Translation{0.0f, 0.5f, 0.0f},
-		nullptr,
+		new Scale{ 2.0f, 5.0f, 2.0f},
 		nullptr
 	}}
 };

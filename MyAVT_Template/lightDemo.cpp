@@ -48,8 +48,6 @@ gmu mu;
 Renderer renderer;
 
 SceneGraph sg;
-SceneGraph::Node* testNode;
-SceneGraph::Node* testNode1;
 	
 // Camera Position
 float camX, camY, camZ;
@@ -130,34 +128,7 @@ void renderSim(void) {
 	renderer.setSpotLightMode(spotlight_mode);
 	renderer.setSpotParam(coneDir, 0.93);
 
-	// fun test time
-	float t;
-	t = glutGet(GLUT_ELAPSED_TIME);
-	float r = 5.0f, gamma = 0.01f, epsylon = 0.05f;
-
-	testNode->localTransform = Transform{
-		new Translation{
-			cos(t * gamma), 
-			10.0f, 
-			sin(t * gamma)
-		},
-		new Scale{
-			r * sin(t * gamma * 0.1f) * cos(t * epsylon * 0.1f),
-			r * sin(t * gamma * 0.1f) * sin(t * epsylon * 0.1f),
-			r * cos(t * gamma * 0.1f)
-		},
-		new Rotation{
-			360 * sin(t * gamma),
-			360 * sin(t * gamma),
-			360 * sin(t * gamma)
-		}
-	};
-
-	testNode1->UpdateLocalTransform(Transform{
-		nullptr,
-		nullptr,
-		new Rotation{1.0f, 0.0f, 1.0f, 0.0f}
-	});
+	//put real time transforms here
 
 	sg.DrawScene();
 	
@@ -347,15 +318,50 @@ void buildScene()
 		meshMaterials[DEFAULT]
 	);
 
+	//floor
 	sg.AddNode(QUAD, 0, objectTransforms[FLOOR]);
-	testNode = sg.AddNode(CUBE, 2, objectTransforms[BUILDING]);
-	SceneGraph::Node* test = sg.AddNode(CUBE, 3, objectTransforms[BUILDING], testNode);
-	test->localTransform = Transform{
-		new Translation{0.0f, 0.0f, 2.0f},
-		nullptr,
-		nullptr
-	};
-	testNode1 = sg.AddNode(CUBE, 3, objectTransforms[BUILDING]);
+	
+	// buildings
+	std::array<int, 2> domainX = {-2, 2};
+	std::array<int, 2> domainY = { -2, 2 };
+	float pdb = 0.5f; //10% of the building size
+	float dbb = 5.0f;
+	int blockSize = 5;
+	SceneGraph::Node* building;
+
+	//sorry not sorry
+	for (int x = domainX[0]; x <= domainX[1]; x++) {
+		if (x == 0) continue; //leave the center free
+
+		for(int y = domainY[0]; y <= domainY[1]; y++) {
+			if (y == 0) continue; //leave the center free
+
+			for (int i = 0; i < blockSize; i++) {
+				for (int j = 0; j < blockSize; j++) {
+
+					 building = sg.AddNode(CUBE, 2, objectTransforms[BUILDING]);
+
+					 building->UpdateLocalTransform(Transform{
+						 new Translation{
+							//this one between blocks
+							((float)x * (dbb + (*objectTransforms[BUILDING].scale)[0] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * pdb)) +
+							//this one between buildings
+							((float)i * ((*objectTransforms[BUILDING].scale)[0] + (*objectTransforms[BUILDING].scale)[0] * pdb)) * (x / -x),
+
+							0.0f,
+
+							((float)y * (dbb + (*objectTransforms[BUILDING].scale)[2] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * pdb)) +
+							((float)j * ((*objectTransforms[BUILDING].scale)[2] + (*objectTransforms[BUILDING].scale)[2] * pdb)) * (x / -x)
+						 },
+						 nullptr,
+						 nullptr
+						 });
+
+				}
+			}
+
+		}
+	}
 
 	//The truetypeInit creates a texture object in TexObjArray for storing the fontAtlasTexture
 	
