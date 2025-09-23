@@ -56,6 +56,8 @@ public:
 		int textureId;
 		Transform localTransform;
 
+		std::array<float, 3> axisRotations = { 0, 0, 0 };
+
 		Node(int meshId, int textureID, Transform localTransform, Node* parent = nullptr)
 		{
 			this->meshId = meshId;
@@ -69,6 +71,14 @@ public:
 		//since we will be adding upon our local transforms
 		//this might hell have to write a little less
 		void UpdateLocalTransform(Transform additiveTransform) {
+			if (additiveTransform.rotation) {
+				axisRotations[0] -= (*additiveTransform.rotation)[1] >= 0 ?
+					(*additiveTransform.rotation)[0] * (3.14159265358979323846f / 180.0f) : 0.0f;
+				axisRotations[1] -= (*additiveTransform.rotation)[2] >= 0 ? 
+					(*additiveTransform.rotation)[0] * (3.14159265358979323846f / 180.0f) : 0.0f;
+				axisRotations[2] -= (*additiveTransform.rotation)[3] >= 0 ? 
+					(*additiveTransform.rotation)[0] * (3.14159265358979323846f / 180.0f) : 0.0f;
+			}
 			localTransform += additiveTransform;
 		}
 
@@ -112,4 +122,8 @@ enum Objects {
 	DRONEBODY
 };
 extern std::unordered_map<Objects, Transform> objectTransforms;
+
+//helper funcitons
+void CreateCity(SceneGraph* sg, std::array<int, 2> domainX, std::array<int, 2> domainY, 
+				int blockSize, float distanceBlocks, float percentDistBuildings);
 

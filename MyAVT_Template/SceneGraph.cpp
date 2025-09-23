@@ -101,3 +101,46 @@ std::unordered_map<Objects, Transform> objectTransforms = {
 		nullptr
 	}},
 };
+
+// helper functions
+
+void CreateCity(SceneGraph* sg ,std::array<int, 2> domainX, std::array<int, 2> domainY, 
+				int blockSize, float distanceBlocks, float percentDistBuildings) 
+{
+	SceneGraph::Node* tmpNode;
+
+	//sorry not sorry
+	for (int x = domainX[0]; x <= domainX[1]; x++) {
+		if (x == 0) continue; //leave the center free
+
+		for (int y = domainY[0]; y <= domainY[1]; y++) {
+			if (y == 0) continue; //leave the center free
+
+			for (int i = 0; i < blockSize; i++) {
+				for (int j = 0; j < blockSize; j++) {
+
+					tmpNode = sg->AddNode(CUBE, 2, objectTransforms[BUILDING]);
+
+					tmpNode->UpdateLocalTransform(Transform{
+						new Translation{
+							//this one between blocks
+							((float)x * (distanceBlocks + (*objectTransforms[BUILDING].scale)[0] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * percentDistBuildings)) +
+							//this one between buildings
+							((float)i * ((*objectTransforms[BUILDING].scale)[0] + (*objectTransforms[BUILDING].scale)[0] * percentDistBuildings)) * (x / -x),
+
+							0.0f,
+
+							((float)y * (distanceBlocks + (*objectTransforms[BUILDING].scale)[2] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * percentDistBuildings)) +
+							((float)j * ((*objectTransforms[BUILDING].scale)[2] + (*objectTransforms[BUILDING].scale)[2] * percentDistBuildings)) * (x / -x)
+							},
+							nullptr,
+							nullptr
+						}
+					);
+
+				}
+			}
+
+		}
+	}
+}

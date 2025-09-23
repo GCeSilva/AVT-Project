@@ -49,6 +49,11 @@ Renderer renderer;
 
 SceneGraph sg;
 SceneGraph::Node* drone;
+
+// Controls
+std::array<int, 2> speedKeys;
+float speed = 1.0f;
+float rotationSpeed = 5.0f;
 	
 // Camera Position
 float camX, camY, camZ;
@@ -139,6 +144,26 @@ void renderSim(void) {
 		});
 	}
 
+	if(speedKeys[0] != 0 || speedKeys[1] != 0) {
+		float tempAngle = 0.0f;
+		if (speedKeys[1] != 0) {
+			tempAngle = rotationSpeed * speedKeys[1];
+			speedKeys[1] = 0;
+		}
+
+		drone->UpdateLocalTransform(Transform{
+				new Translation{
+					speedKeys[0] * speed * cos(drone->axisRotations[1]),
+					0.0f,
+					speedKeys[0] * speed * sin(drone->axisRotations[1])
+				},
+				nullptr,
+				new Rotation{ tempAngle, 0.0f, 1.0f, 0.0f }
+			}
+		);
+		speedKeys[0] = 0;
+	}
+
 	sg.DrawScene();
 	
 	//Render text (bitmap fonts) in screen coordinates. So use ortoghonal projection with viewport coordinates.
@@ -198,6 +223,20 @@ void processKeys(unsigned char key, int xx, int yy)
 				spotlight_mode = false;
 				printf("Spot light disabled. Point light enabled\n");
 			}
+			break;
+
+		//it would be nice to put these in if statements instead
+		case 'w':
+			speedKeys[0] = 1;
+			break;
+		case 'a':
+			speedKeys[1] = 1;
+			break;
+		case 's':
+			speedKeys[0] = -1;
+			break;
+		case 'd':
+			speedKeys[1] = -1;
 			break;
 
 		case 'r':    //reset
@@ -333,45 +372,11 @@ void buildScene()
 	// buildings
 	std::array<int, 2> domainX = {-2, 2};
 	std::array<int, 2> domainY = { -2, 2 };
-	float pdb = 0.5f; //10% of the building size
+	float pdb = 0.5f; //50% of the building size
 	float dbb = 5.0f;
 	int blockSize = 5;
-	SceneGraph::Node* tmpNode;
 
-	//sorry not sorry
-	for (int x = domainX[0]; x <= domainX[1]; x++) {
-		if (x == 0) continue; //leave the center free
-
-		for(int y = domainY[0]; y <= domainY[1]; y++) {
-			if (y == 0) continue; //leave the center free
-
-			for (int i = 0; i < blockSize; i++) {
-				for (int j = 0; j < blockSize; j++) {
-
-					tmpNode = sg.AddNode(CUBE, 2, objectTransforms[BUILDING]);
-
-					tmpNode->UpdateLocalTransform(Transform{
-						new Translation{
-						//this one between blocks
-						((float)x * (dbb + (*objectTransforms[BUILDING].scale)[0] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * pdb)) +
-						//this one between buildings
-						((float)i * ((*objectTransforms[BUILDING].scale)[0] + (*objectTransforms[BUILDING].scale)[0] * pdb)) * (x / -x),
-
-						0.0f,
-
-						((float)y * (dbb + (*objectTransforms[BUILDING].scale)[2] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * pdb)) +
-						((float)j * ((*objectTransforms[BUILDING].scale)[2] + (*objectTransforms[BUILDING].scale)[2] * pdb)) * (x / -x)
-						},
-						nullptr,
-						nullptr
-						}
-					);
-
-				}
-			}
-
-		}
-	}
+	CreateCity(&sg, domainX, domainY, blockSize, dbb, pdb);
 
 	//drone
 	drone = sg.AddNode(CUBE, 3, objectTransforms[DRONEBODY]);
