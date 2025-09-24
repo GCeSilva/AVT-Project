@@ -8,6 +8,8 @@
 #include "renderer.h"
 #include "model.h"
 
+#define NUM_POINT_LIGHTS 6
+#define NUM_SPOT_LIGHTS 2
 
 extern gmu mu;
 extern Renderer renderer;
@@ -87,14 +89,38 @@ public:
 		std::list<Node*> children = {};
 	};
 
+	struct SpotLight {
+		float position[4];
+		float coneDirection[4];
+		float cutOff;
+		Node* parent;
+	};
+	struct PointLight
+	{
+		float position[4];
+		Node* parent;
+	};
+
+	bool spotLightMode;
+	bool pointLightMode;
+	bool directionalLightMode;
+
 	void InitializeSceneGraph();
+	void AddPointLight(float pos[4], Node* parent = nullptr);
+	void AddDirectionalLight(float pos[4]);
+	void AddSpotLight(float pos[4], float coneDir[4], float cutOff, Node* parent = nullptr);
 	Node* AddNode(int meshId, int textureId, Transform localTransform, Node* parent = nullptr);
 	void DrawScene();
 
 private:
 	std::list<Node*> head;
 
+	std::list<PointLight*> pointLights;
+	std::list<SpotLight*> spotLights;
+	float directionalLights[4];
+
 	void DrawNode(Node* node);
+	void CalculateLights();
 };
 
 // mesh creation

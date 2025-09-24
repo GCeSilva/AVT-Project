@@ -54,9 +54,16 @@ public:
 
   void setLightPos(float *lightPos);
 
-  void setSpotParam(float *coneDir, float cutOff);
+  void SetPointLights(float (*pointLights)[6][4]);
+  void SetPointLightsMode(bool pointLightMode);
 
+  void SetDirectionalLight(float* dirLight);
+  void SetDirectionalLightMode(bool dirLightMode);
+
+  void SetSpotLights(float (*spotLightPos)[2][4]);
   void setSpotLightMode(bool spotLightMode);
+  void setSpotParam(float (*coneDir)[2][4], float cutOff[2]);
+
 
   void setTexUnit(int tuId, int texObjId);
 

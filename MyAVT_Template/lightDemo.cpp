@@ -69,12 +69,32 @@ int startX, startY, tracking = 0;
 long myTime,timebase = 0,frame = 0;
 char s[32];
 
-float lightPos[4] = {4.0f, 5.0f, 2.0f, 1.0f};
-//float lightPos[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+//lights
+// probably at some point remove this from here and put it on its own file or something
+float directionalLightPos[4] = { 1.0f, 1000.0f, 1.0f, 0.0f };
+bool directionalLightMode = false;
+
+float pointLightPos[NUM_POINT_LIGHTS][4] = {
+	{  50.0f,  1.0f,   50.0f, 1.0f },
+	{ -50.0f,  1.0f,   50.0f, 1.0f },
+	{  50.0f,  1.0f,  -50.0f, 1.0f },
+	{ -50.0f,  1.0f,  -50.0f, 1.0f },
+	{   0.0f,  1.0f,    0.0f, 1.0f },
+	{  50.0f,  1.0f,    0.0f, 1.0f }
+};
+bool pointLightMode = false;
 
 //Spotlight
-bool spotlight_mode = false;
-float coneDir[4] = { 0.0f, -0.0f, -1.0f, 0.0f };
+float spotLightPos[NUM_SPOT_LIGHTS][4] = {
+	{ 4.0f, 5.0f, 2.0f, 1.0f },
+	{ 4.0f, 5.0f, 2.0f, 1.0f }
+};
+float coneDir[NUM_SPOT_LIGHTS][4] = { 
+	{ 0.0f, -0.0f, -1.0f, 0.0f },
+	{ 0.0f, -0.0f, -1.0f, 0.0f }
+};
+float cutOff[NUM_SPOT_LIGHTS] = { 0.93f, 0.93f };
+bool spotLightMode = true;
 
 bool fontLoaded = false;
 
@@ -117,22 +137,10 @@ void renderSim(void) {
 	renderer.setTexUnit(2, 2);
 
 	// load identity matrices
-	/*mu.loadIdentity(gmu::VIEW);
-	mu.loadIdentity(gmu::MODEL);*/
 	sg.InitializeSceneGraph();
+
 	// set the camera using a function similar to gluLookAt
 	mu.lookAt(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
-
-	//send the light position in eye coordinates
-	//renderer.setLightPos(lightPos); //efeito capacete do mineiro, ou seja lighPos foi definido em eye coord 
-
-	float lposAux[4];
-	mu.multMatrixPoint(gmu::VIEW, lightPos, lposAux);   //lightPos definido em World Coord so is converted to eye space
-	renderer.setLightPos(lposAux);
-
-	//Spotlight settings
-	renderer.setSpotLightMode(spotlight_mode);
-	renderer.setSpotParam(coneDir, 0.93);
 
 	//put real time transforms here
 	for each(SceneGraph::Node* child in drone->GetChildren())
@@ -144,7 +152,8 @@ void renderSim(void) {
 		});
 	}
 
-	if(speedKeys[0] != 0 || speedKeys[1] != 0) {
+	// key input output
+	if (speedKeys[0] != 0 || speedKeys[1] != 0) {
 		float tempAngle = 0.0f;
 		if (speedKeys[1] != 0) {
 			tempAngle = rotationSpeed * speedKeys[1];
@@ -211,18 +220,14 @@ void processKeys(unsigned char key, int xx, int yy)
 			break;
 
 		case 'c': 
-			printf("Camera Spherical Coordinates (%f, %f, %f)\n", alpha, beta, r);
+			//printf("Camera Spherical Coordinates (%f, %f, %f)\n", alpha, beta, r);
+			sg.pointLightMode = !sg.pointLightMode;
 			break;
-
-		case 'l':   //toggle spotlight mode
-			if (!spotlight_mode) {
-				spotlight_mode = true;
-				printf("Point light disabled. Spot light enabled\n");
-			}
-			else {
-				spotlight_mode = false;
-				printf("Spot light disabled. Point light enabled\n");
-			}
+		case 'n':
+			sg.directionalLightMode = !sg.directionalLightMode;
+			break;
+		case 'h':   //toggle spotlight mode
+			sg.spotLightMode = !sg.spotLightMode;
 			break;
 
 		//it would be nice to put these in if statements instead
@@ -248,7 +253,7 @@ void processKeys(unsigned char key, int xx, int yy)
 			break;
 
 		case 'm': glEnable(GL_MULTISAMPLE); break;
-		case 'n': glDisable(GL_MULTISAMPLE); break;
+		case 'b': glDisable(GL_MULTISAMPLE); break;
 	}
 }
 
@@ -400,6 +405,22 @@ void buildScene()
 		new Scale{0.2f, 0.2f, 0.2f},
 		nullptr
 	}, drone);
+
+
+	//lights
+	sg.directionalLightMode = directionalLightMode;
+	sg.pointLightMode = pointLightMode;
+	sg.spotLightMode = spotLightMode;
+
+	for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
+		sg.AddPointLight(pointLightPos[i]);
+	}
+
+	sg.AddDirectionalLight(directionalLightPos);
+
+	for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
+		sg.AddSpotLight(spotLightPos[i], coneDir[i], cutOff[i], drone);
+	}
 
 	//The truetypeInit creates a texture object in TexObjArray for storing the fontAtlasTexture
 	
