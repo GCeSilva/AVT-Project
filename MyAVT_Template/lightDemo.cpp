@@ -48,7 +48,7 @@ gmu mu;
 Renderer renderer;
 
 SceneGraph sg;
-SceneGraph::Node* drone;
+Node* drone;
 
 // Controls
 std::array<int, 2> speedKeys;
@@ -143,7 +143,7 @@ void renderSim(void) {
 	mu.lookAt(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
 
 	//put real time transforms here
-	for each(SceneGraph::Node* child in drone->GetChildren())
+	for each(Node* child in drone->GetChildren())
 	{
 		child->UpdateLocalTransform(Transform{
 			nullptr,
@@ -413,13 +413,13 @@ void buildScene()
 	sg.spotLightMode = spotLightMode;
 
 	for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
-		sg.AddPointLight(pointLightPos[i]);
+		sg.AddLight(new PointLightNode(pointLightPos[i]));
 	}
 
-	sg.AddDirectionalLight(directionalLightPos);
+	sg.AddLight(new DirectionalLightNode(directionalLightPos));
 
 	for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
-		sg.AddSpotLight(spotLightPos[i], coneDir[i], cutOff[i], drone);
+		sg.AddLight(new SpotLightNode(spotLightPos[i], coneDir[i], cutOff[i], drone));
 	}
 
 	//The truetypeInit creates a texture object in TexObjArray for storing the fontAtlasTexture

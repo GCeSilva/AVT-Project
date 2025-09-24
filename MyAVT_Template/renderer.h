@@ -6,6 +6,7 @@
 //
 
 #include <vector>
+#include <string>
 #include "texture.h"
 #include "model.h"
 #include "stb_truetype.h"
@@ -52,17 +53,15 @@ public:
 
   void renderText(const TextCommand &text);
 
-  void setLightPos(float *lightPos);
-
-  void SetPointLights(float (*pointLights)[6][4]);
   void SetPointLightsMode(bool pointLightMode);
+  void SetPointLights(float (*pointLights)[4], int* shaderArrayIndex);
 
-  void SetDirectionalLight(float* dirLight);
   void SetDirectionalLightMode(bool dirLightMode);
+  void SetDirectionalLight(float* dirLight);
 
-  void SetSpotLights(float (*spotLightPos)[2][4]);
   void setSpotLightMode(bool spotLightMode);
-  void setSpotParam(float (*coneDir)[2][4], float cutOff[2]);
+  void SetSpotLights(float (*spotLightPos)[4], int* shaderArrayIndex);
+  void setSpotParam(float (*coneDir)[4], float cutOff, int* shaderArrayIndex);
 
 
   void setTexUnit(int tuId, int texObjId);

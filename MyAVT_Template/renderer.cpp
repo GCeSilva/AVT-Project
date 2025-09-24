@@ -200,19 +200,6 @@ void Renderer::activateRenderMeshesShaderProg() {   //GLSL program to draw the m
     glUseProgram(program);
 }
 
-//Later change the argument to something better and generic
-void Renderer::SetSpotLights(float (*spotLightPos)[2][4]) {
-    GLint loc;
-    float res[4];
-	//LATER CHANGE 2 TO SOMETHING MORE PROPER
-    for (int i = 0; i < 2; i++) {
-        mu.multMatrixPoint(gmu::VIEW, (*spotLightPos)[i], res);
-        std::string a = "spotLights[" + std::to_string(i) + "]";
-        const GLchar* location = a.data();
-        loc = glGetUniformLocation(program, location);
-        glUniform4fv(loc, 1, res);
-    }
-}
 void Renderer::setSpotLightMode(bool spotLightMode) {
     GLint loc;
     loc = glGetUniformLocation(program, "spotLightsOn");
@@ -220,42 +207,6 @@ void Renderer::setSpotLightMode(bool spotLightMode) {
         glUniform1i(loc, 1);
     else
         glUniform1i(loc, 0);
-}
-//Later change the argument to something better and generic
-void Renderer::setSpotParam(float (*coneDir)[2][4], float cutOff[2]) {
-    GLint loc;
-    float res[4];
-    for(int i = 0; i < 2; i++) {
-        mu.multMatrixPoint(gmu::VIEW, (*coneDir)[i], res);
-		std::string a = "coneDir[" + std::to_string(i) + "]";
-		const GLchar* location = a.data();
-		loc = glGetUniformLocation(program, location);
-		glUniform4fv(loc, 1, res);
-
-		a = "spotCosCutOff[" + std::to_string(i) + "]";
-		location = a.data();
-		loc = glGetUniformLocation(program, location);
-		glUniform1f(loc, cutOff[i]);
-	}
-}
-
-void Renderer::setLightPos(float* lightPos) {
-    glUniform4fv(lpos_loc, 1, lightPos);
-}
-
-//Later change the argument to something better and generic
-void Renderer::SetPointLights(float (*pointLights)[6][4]) {
-
-    GLint loc;
-    float res[4];
-    // LATER CHANGE 6 TO SOMETHING MORE PROPER
-    for (int i = 0; i < 6; i++) {
-        mu.multMatrixPoint(gmu::VIEW, (*pointLights)[i], res);
-        std::string a = "pointLights[" + std::to_string(i) + "]";
-        const GLchar* location = a.data();
-        loc = glGetUniformLocation(program, location);
-        glUniform4fv(loc, 1, res);
-    }
 }
 void Renderer::SetPointLightsMode(bool pointLightMode) {
     GLint loc;
@@ -265,15 +216,6 @@ void Renderer::SetPointLightsMode(bool pointLightMode) {
     else
         glUniform1i(loc, 0);
 }
-
-void Renderer::SetDirectionalLight(float* dirLight) {
-    GLint loc;
-    float aux[4];
-	mu.multMatrixPoint(gmu::VIEW, dirLight, aux);
-	mu.normalize(aux);
-    loc = glGetUniformLocation(program, "dirLight");
-	glUniform4fv(loc, 1, aux);
-}
 void Renderer::SetDirectionalLightMode(bool dirLightMode) {
     GLint loc;
     loc = glGetUniformLocation(program, "dirLightMode");
@@ -281,6 +223,63 @@ void Renderer::SetDirectionalLightMode(bool dirLightMode) {
         glUniform1i(loc, 1);
     else
         glUniform1i(loc, 0);
+}
+
+//Later change the argument to something better and generic
+void Renderer::SetPointLights(float (*pointLights)[4], int* shaderArrayIndex) {
+
+    GLint loc;
+    float res[4];
+
+    mu.multMatrixPoint(gmu::VIEW, *pointLights, res);
+
+    std::string a = "pointLights[" + std::to_string(*shaderArrayIndex) + "]";
+    const GLchar* location = a.data();
+
+    loc = glGetUniformLocation(program, location);
+    glUniform4fv(loc, 1, res);
+}
+void Renderer::SetDirectionalLight(float* dirLight) {
+    GLint loc;
+    float aux[4];
+    mu.multMatrixPoint(gmu::VIEW, dirLight, aux);
+    mu.normalize(aux);
+    loc = glGetUniformLocation(program, "dirLight");
+    glUniform4fv(loc, 1, aux);
+}
+//Later change the argument to something better and generic
+void Renderer::SetSpotLights(float (*spotLightPos)[4], int* shaderArrayIndex) {
+    GLint loc;
+    float res[4];
+
+    mu.multMatrixPoint(gmu::VIEW, *spotLightPos, res);
+
+    std::string a = "spotLights[" + std::to_string(*shaderArrayIndex) + "]";
+    const GLchar* location = a.data();
+
+    loc = glGetUniformLocation(program, location);
+    glUniform4fv(loc, 1, res);
+ 
+}
+//Later change the argument to something better and generic
+void Renderer::setSpotParam(float (*coneDir)[4], float cutOff, int* shaderArrayIndex) {
+    GLint loc;
+    float res[4];
+
+    mu.multMatrixPoint(gmu::VIEW, *coneDir, res);
+
+    std::string a = "coneDir[" + std::to_string(*shaderArrayIndex) + "]";
+    const GLchar* location = a.data();
+
+    loc = glGetUniformLocation(program, location);
+    glUniform4fv(loc, 1, res);
+
+    a = "spotCosCutOff[" + std::to_string(*shaderArrayIndex) + "]";
+    location = a.data();
+
+    loc = glGetUniformLocation(program, location);
+    glUniform1f(loc, cutOff);
+
 }
 
 void Renderer::setTexUnit(int tuId, int texObjId) {
