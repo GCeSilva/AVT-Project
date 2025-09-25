@@ -51,7 +51,7 @@ SceneGraph sg;
 Node* drone;
 
 // Controls
-std::array<int, 2> speedKeys;
+std::array<int, 4> speedKeys;
 float speed = 1.0f;
 float rotationSpeed = 5.0f;
 	
@@ -86,8 +86,8 @@ bool pointLightMode = false;
 
 //Spotlight
 float spotLightPos[NUM_SPOT_LIGHTS][4] = {
-	{ 0.0f, 0.0f, 0.0f, 1.0f },
-	{ 0.0f, 0.0f, 0.0f, 1.0f }
+	{ 1.0f, 0.0f, 0.0f, 1.0f },
+	{ -1.0f, 0.0f, 0.0f, 1.0f }
 };
 float coneDir[NUM_SPOT_LIGHTS][4] = { 
 	{ 0.0f, -0.0f, -1.0f, 0.0f },
@@ -136,24 +136,23 @@ void animations() {
 
 void applyKeys() {
 	// key input output
-	if (speedKeys[0] != 0 || speedKeys[1] != 0) {
+	// WE NEED TO ADD TILT TO THE MOVEMENT AND ALSO MOVE THE LIGTHS ACCORDINGLY
+	if (speedKeys[0] != 0 || speedKeys[1] != 0 || speedKeys[2] != 0 || speedKeys[3] != 0) {
 		float tempAngle = 0.0f;
-		if (speedKeys[1] != 0) {
-			tempAngle = rotationSpeed * speedKeys[1];
-			speedKeys[1] = 0;
+		if (speedKeys[2] != 0 || speedKeys[3]) {
+			tempAngle = rotationSpeed * (speedKeys[2] + speedKeys[3]);
 		}
 
 		drone->UpdateLocalTransform(Transform{
 				new Translation{
-					speedKeys[0] * speed * cos(drone->axisRotations[1]),
+					(speedKeys[0] + speedKeys[1]) * speed* cos(drone->axisRotations[1]),
 					0.0f,
-					speedKeys[0] * speed * sin(drone->axisRotations[1])
+					(speedKeys[0] + speedKeys[1])* speed* sin(drone->axisRotations[1])
 				},
 				nullptr,
 				new Rotation{ tempAngle, 0.0f, 1.0f, 0.0f }
 			}
 		);
-		speedKeys[0] = 0;
 	}
 }
 
@@ -177,6 +176,7 @@ void renderSim(void) {
 	mu.lookAt(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
 
 	animations();
+
 	applyKeys();
 
 	sg.DrawScene();
@@ -219,48 +219,47 @@ void renderSim(void) {
 
 void processKeys(unsigned char key, int xx, int yy)
 {
-	switch(key) {
+	if (key == 'u')
 
-		case 27:
-			glutLeaveMainLoop();
-			break;
+	if(key == 27) glutLeaveMainLoop();
 
-		case 'c': 
-			//printf("Camera Spherical Coordinates (%f, %f, %f)\n", alpha, beta, r);
-			sg.pointLightMode = !sg.pointLightMode;
-			break;
-		case 'n':
-			sg.directionalLightMode = !sg.directionalLightMode;
-			break;
-		case 'h':   //toggle spotlight mode
-			sg.spotLightMode = !sg.spotLightMode;
-			break;
+	if(key == 'c') sg.pointLightMode = !sg.pointLightMode;
 
-		//it would be nice to put these in if statements instead
-		case 'w':
-			speedKeys[0] = 1;
-			break;
-		case 'a':
-			speedKeys[1] = 1;
-			break;
-		case 's':
-			speedKeys[0] = -1;
-			break;
-		case 'd':
-			speedKeys[1] = -1;
-			break;
+	if(key == 'n') sg.directionalLightMode = !sg.directionalLightMode;
 
-		case 'r':    //reset
-			alpha = 57.0f; beta = 18.0f;  // Camera Spherical Coordinates
-			r = 45.0f;
-			camX = r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-			camZ = r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-			camY = r * sin(beta * 3.14f / 180.0f);
-			break;
+	if(key == 'h') sg.spotLightMode = !sg.spotLightMode;
 
-		case 'm': glEnable(GL_MULTISAMPLE); break;
-		case 'b': glDisable(GL_MULTISAMPLE); break;
+	if(key == 'w') speedKeys[0] = 1;
+
+	if(key == 's') speedKeys[1] = -1;
+
+	if(key == 'a') speedKeys[2] = 1;
+
+	if(key == 'd') speedKeys[3] = -1;
+
+	if(key == 'm') glEnable(GL_MULTISAMPLE);
+
+	if(key == 'b') glDisable(GL_MULTISAMPLE);
+
+	if (key == 'r') { //reset
+		alpha = 57.0f; beta = 18.0f;  // Camera Spherical Coordinates
+		r = 45.0f;
+		camX = r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
+		camZ = r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
+		camY = r * sin(beta * 3.14f / 180.0f);
 	}
+
+}
+
+void processKeysUp(unsigned char key, int xx, int yy)
+{
+	if (key == 'w') speedKeys[0] = 0;
+
+	if (key == 's') speedKeys[1] = 0;
+
+	if (key == 'a') speedKeys[2] = 0;
+
+	if (key == 'd') speedKeys[3] = 0;
 }
 
 
@@ -492,6 +491,8 @@ int main(int argc, char **argv) {
 
 //	Mouse and Keyboard Callbacks
 	glutKeyboardFunc(processKeys);
+	glutKeyboardUpFunc(processKeysUp);
+
 	glutMouseFunc(processMouseButtons);
 	glutMotionFunc(processMouseMotion);
 	glutMouseWheelFunc ( mouseWheel ) ;
