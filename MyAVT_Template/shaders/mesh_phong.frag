@@ -1,7 +1,7 @@
 #version 430
 
 #define NUMBER_POINT_LIGHTS 6
-#define NUMBER_SPOT_LIGHTS 1
+#define NUMBER_SPOT_LIGHTS 2
 
 struct Materials {
 	vec4 diffuse;
