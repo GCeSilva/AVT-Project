@@ -86,8 +86,8 @@ bool pointLightMode = false;
 
 //Spotlight
 float spotLightPos[NUM_SPOT_LIGHTS][4] = {
-	{ 4.0f, 5.0f, 2.0f, 1.0f },
-	{ 4.0f, 5.0f, 2.0f, 1.0f }
+	{ 1.0f, 0.0f, 0.0f, 1.0f },
+	{ -1.0f, 0.0f, 0.0f, 1.0f }
 };
 float coneDir[NUM_SPOT_LIGHTS][4] = { 
 	{ 0.0f, -0.0f, -1.0f, 0.0f },
