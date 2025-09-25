@@ -86,8 +86,8 @@ bool pointLightMode = false;
 
 //Spotlight
 float spotLightPos[NUM_SPOT_LIGHTS][4] = {
-	{ 1.0f, 0.0f, 0.0f, 1.0f },
-	{ -1.0f, 0.0f, 0.0f, 1.0f }
+	{ 0.0f, 0.0f, 0.0f, 1.0f },
+	{ 0.0f, 0.0f, 0.0f, 1.0f }
 };
 float coneDir[NUM_SPOT_LIGHTS][4] = { 
 	{ 0.0f, -0.0f, -1.0f, 0.0f },
@@ -122,36 +122,19 @@ void changeSize(int w, int h) {
 //
 // Render stufff
 //
-
-void renderSim(void) {
-
-	FrameCount++;
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	renderer.activateRenderMeshesShaderProg(); // use the required GLSL program to draw the meshes with illumination
-
-	//Associar os Texture Units aos Objects Texture
-	//stone.tga loaded in TU0; checker.tga loaded in TU1;  lightwood.tga loaded in TU2
-	renderer.setTexUnit(0, 0);
-	renderer.setTexUnit(1, 1);
-	renderer.setTexUnit(2, 2);
-
-	// load identity matrices
-	sg.InitializeSceneGraph();
-
-	// set the camera using a function similar to gluLookAt
-	mu.lookAt(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
-
+void animations() {
 	//put real time transforms here
-	for each(Node* child in drone->GetChildren())
+	for each(Node * child in drone->GetChildren())
 	{
 		child->UpdateLocalTransform(Transform{
 			nullptr,
 			nullptr,
 			new Rotation{ 5.0f, 0.0f, 1.0f, 0.0f }
-		});
+			});
 	}
+}
 
+void applyKeys() {
 	// key input output
 	if (speedKeys[0] != 0 || speedKeys[1] != 0) {
 		float tempAngle = 0.0f;
@@ -172,6 +155,29 @@ void renderSim(void) {
 		);
 		speedKeys[0] = 0;
 	}
+}
+
+void renderSim(void) {
+
+	FrameCount++;
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	renderer.activateRenderMeshesShaderProg(); // use the required GLSL program to draw the meshes with illumination
+
+	//Associar os Texture Units aos Objects Texture
+	//stone.tga loaded in TU0; checker.tga loaded in TU1;  lightwood.tga loaded in TU2
+	renderer.setTexUnit(0, 0);
+	renderer.setTexUnit(1, 1);
+	renderer.setTexUnit(2, 2);
+
+	// load identity matrices
+	sg.InitializeSceneGraph();
+
+	// set the camera using a function similar to gluLookAt
+	mu.lookAt(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
+
+	animations();
+	applyKeys();
 
 	sg.DrawScene();
 	

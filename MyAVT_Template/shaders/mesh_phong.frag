@@ -105,9 +105,9 @@ void main() {
 					intSpec = max(dot(h,n), 0.0);
 					spec = mat.specular * pow(intSpec, mat.shininess) * att;
 				}
+				intensitySum += intensity / NUMBER_SPOT_LIGHTS;
+				specSum += spec / NUMBER_SPOT_LIGHTS;
 			}
-			intensitySum += intensity / NUMBER_SPOT_LIGHTS;
-			specSum += spec / NUMBER_SPOT_LIGHTS;
 		}
 	}
 

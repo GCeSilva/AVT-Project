@@ -39,7 +39,6 @@ public:
 	void CalculateLight(int* shaderArrayIndex) override;
 
 	DirectionalLightNode(float pos[4]) {
-		memcpy(position, pos, sizeof(int) * 4);
 		memcpy(position, pos, sizeof(float) * 4);
 	}
 };
