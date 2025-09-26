@@ -52,7 +52,7 @@ Node* drone;
 
 // Controls
 std::array<int, 4> speedKeys;
-float speed = 1.0f;
+float speed = 0.5f;
 float rotationSpeed = 5.0f;
 	
 // Camera Position
@@ -122,6 +122,13 @@ void changeSize(int w, int h) {
 //
 // Render stufff
 //
+
+// forward anim vars
+float animSpeed = 0.1f;
+float tiltAngle = -(15.0f * (PI / 180.0f));
+// side to side anim vars
+float sideTiltAngle = -(10.0f * (PI / 180.0f));
+
 void animations() {
 	//put real time transforms here
 	for each(Node * child in drone->GetChildren())
@@ -131,6 +138,20 @@ void animations() {
 			nullptr,
 			new Rotation{ 5.0f, 0.0f, 1.0f, 0.0f }
 			});
+	}
+
+	if (speedKeys[0] != 0 || speedKeys[1] != 0) {
+		// never forgeti, this is in radians
+		drone->axisRotations[2] = lerp(drone->axisRotations[2], (speedKeys[1] + speedKeys[0]) * tiltAngle, animSpeed);
+	}
+	else {
+		drone->axisRotations[2] = lerp( drone->axisRotations[2], 0, animSpeed);
+	}
+	if (speedKeys[2] != 0 || speedKeys[3] != 0) {
+		drone->axisRotations[0] = lerp(drone->axisRotations[0], (speedKeys[3] + speedKeys[2]) * sideTiltAngle, animSpeed);
+	}
+	else {
+		drone->axisRotations[0] = lerp(drone->axisRotations[0], 0, animSpeed);
 	}
 }
 
@@ -231,7 +252,7 @@ void processKeys(unsigned char key, int xx, int yy)
 
 	if(key == 'h') sg.spotLightMode = !sg.spotLightMode;
 
-	if(key == 'w') speedKeys[0] = 1;
+	if (key == 'w') speedKeys[0] = 1;
 
 	if(key == 's') speedKeys[1] = -1;
 
