@@ -52,7 +52,7 @@ Node* drone;
 
 // Controls
 std::array<int, 4> speedKeys;
-float speed = 0.5f;
+float speed = 0.0f;
 float rotationSpeed = 5.0f;
 	
 // Camera Position

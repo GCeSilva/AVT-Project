@@ -45,7 +45,9 @@ void SpotLightNode::CalculateLight(int* shaderArrayIndex) {
 			//x
 			tempConeDir[0] = coneDirection[0] + cos(-parent->axisRotations[1]) / (PI / 180.0f);
 			//y
-			tempConeDir[1] = coneDirection[1];
+			// adding this one was fairly simple, just wonder if we might have issues later on
+			// since this is not a full spherical coordinate system
+			tempConeDir[1] = coneDirection[1] + sin(parent->axisRotations[2]) / (PI / 180.0f);
 			//z
 			tempConeDir[2] = coneDirection[2] + sin(-parent->axisRotations[1]) / (PI / 180.0f);
 			//not used
