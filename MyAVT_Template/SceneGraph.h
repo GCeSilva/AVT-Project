@@ -72,7 +72,8 @@ enum Objects {
 };
 extern std::unordered_map<Objects, Transform> objectTransforms;
 
-//helper funcitons
+//helper funcitons, later put them in their own .h file
 void CreateCity(SceneGraph* sg, std::array<int, 2> domainX, std::array<int, 2> domainY, 
 				int blockSize, float distanceBlocks, float percentDistBuildings);
+float lerp(float from, float to, float step);
 

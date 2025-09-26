@@ -39,9 +39,16 @@ void SpotLightNode::CalculateLight(int* shaderArrayIndex) {
 
 			// later turn this into proper spherical coordinates
 			// also these need to be in degrees, hence the division by (PI/180)
-			tempConeDir[0] = coneDirection[0] + cos(parent->axisRotations[1]) / (PI / 180.0f);
+			// these have to be turned into degrees because these are not going to be processed by rotate, they are going to be used directly in the shader
+			// so there is never a conversion, and since the rotate function uses radians, we need to convert them back
+			// negative, same thing that i need to think about to understand why
+			//x
+			tempConeDir[0] = coneDirection[0] + cos(-parent->axisRotations[1]) / (PI / 180.0f);
+			//y
 			tempConeDir[1] = coneDirection[1];
-			tempConeDir[2] = coneDirection[2] + sin(parent->axisRotations[1]) / (PI / 180.0f);
+			//z
+			tempConeDir[2] = coneDirection[2] + sin(-parent->axisRotations[1]) / (PI / 180.0f);
+			//not used
 			tempConeDir[3] = coneDirection[3];
 
 			renderer.SetSpotLights(&tempSpotLight, shaderArrayIndex);

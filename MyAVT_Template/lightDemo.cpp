@@ -145,9 +145,11 @@ void applyKeys() {
 
 		drone->UpdateLocalTransform(Transform{
 				new Translation{
-					(speedKeys[0] + speedKeys[1]) * speed* cos(drone->axisRotations[1]),
+				// this is using radians, since later the rotate is also in radians
+				// need to think why it needs to be negative
+					(speedKeys[0] + speedKeys[1]) * speed * cos(-drone->axisRotations[1]),
 					0.0f,
-					(speedKeys[0] + speedKeys[1])* speed* sin(drone->axisRotations[1])
+					(speedKeys[0] + speedKeys[1])* speed * sin(-drone->axisRotations[1])
 				},
 				nullptr,
 				new Rotation{ tempAngle, 0.0f, 1.0f, 0.0f }

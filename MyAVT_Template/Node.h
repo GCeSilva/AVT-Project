@@ -51,21 +51,38 @@ public:
 	{
 		this->meshId = meshId;
 		this->textureId = textureID;
-		this->localTransform = localTransform;
 		this->parent = parent;
+
+		this->localTransform = localTransform;
+		if (localTransform.rotation) {
+			//saving them as radians
+			axisRotations[0] += (*localTransform.rotation)[1] > 0.0f ?
+				(*localTransform.rotation)[0] * (PI / 180.0f) : 0.0f;
+
+			axisRotations[1] += (*localTransform.rotation)[2] > 0.0f ?
+				(*localTransform.rotation)[0] * (PI / 180.0f) : 0.0f;
+
+			axisRotations[2] += (*localTransform.rotation)[3] > 0.0f ?
+				(*localTransform.rotation)[0] * (PI / 180.0f) : 0.0f;
+		}
+
 	}
 	void AddChild(Node* child) { this->children.push_back(child); }
 	std::list<Node*> GetChildren() { return this->children; }
 
 	//since we will be adding upon our local transforms
 	//this might hell have to write a little less
+	//could this allow negative axis values?
 	void UpdateLocalTransform(Transform additiveTransform) {
 		if (additiveTransform.rotation) {
-			axisRotations[0] -= (*additiveTransform.rotation)[1] >= 0 ?
+			//saving them as radians
+			axisRotations[0] += (*additiveTransform.rotation)[1] > 0 ?
 				(*additiveTransform.rotation)[0] * (PI / 180.0f) : 0.0f;
-			axisRotations[1] -= (*additiveTransform.rotation)[2] >= 0 ?
+
+			axisRotations[1] += (*additiveTransform.rotation)[2] > 0 ?
 				(*additiveTransform.rotation)[0] * (PI / 180.0f) : 0.0f;
-			axisRotations[2] -= (*additiveTransform.rotation)[3] >= 0 ?
+
+			axisRotations[2] += (*additiveTransform.rotation)[3] > 0 ?
 				(*additiveTransform.rotation)[0] * (PI / 180.0f) : 0.0f;
 		}
 		localTransform += additiveTransform;
