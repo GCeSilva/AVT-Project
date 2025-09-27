@@ -174,9 +174,6 @@ void CreateCity(SceneGraph* sg ,std::array<int, 2> domainX, std::array<int, 2> d
 	}
 }
 
-// 1st is naive linear interpolation
-// 2nd accounts for floating point precision issues
 float lerp(float from, float to, float step) {
-	//return (1 - step) * from + step * to;
 	return (1 - step) * from + step * to;
 }

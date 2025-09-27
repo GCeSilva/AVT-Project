@@ -52,7 +52,8 @@ Node* drone;
 
 // Controls
 std::array<int, 4> speedKeys;
-float speed = 0.0f;
+// SPEED IS MEANT TO INCREMENT AND DECREMENT AS WE CLICK THE KEYS
+float speed = 0.5f;
 float rotationSpeed = 5.0f;
 	
 // Camera Position
@@ -242,8 +243,6 @@ void renderSim(void) {
 
 void processKeys(unsigned char key, int xx, int yy)
 {
-	if (key == 'u')
-
 	if(key == 27) glutLeaveMainLoop();
 
 	if(key == 'c') sg.pointLightMode = !sg.pointLightMode;
@@ -254,11 +253,11 @@ void processKeys(unsigned char key, int xx, int yy)
 
 	if (key == 'w') speedKeys[0] = 1;
 
-	if(key == 's') speedKeys[1] = -1;
+	if (key == 'a') speedKeys[2] = 1;
 
-	if(key == 'a') speedKeys[2] = 1;
+	if (key == 's') speedKeys[1] = -1;
 
-	if(key == 'd') speedKeys[3] = -1;
+	if (key == 'd') speedKeys[3] = -1;
 
 	if(key == 'm') glEnable(GL_MULTISAMPLE);
 
