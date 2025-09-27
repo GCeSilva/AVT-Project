@@ -53,7 +53,9 @@ Node* drone;
 // Controls
 std::array<int, 4> speedKeys;
 // SPEED IS MEANT TO INCREMENT AND DECREMENT AS WE CLICK THE KEYS
-float speed = 0.5f;
+float currentSpeed = 0.0f;
+float maxSpeed = 0.5f;
+float acceleration = 0.1f;
 float rotationSpeed = 5.0f;
 	
 // Camera Position
@@ -159,25 +161,27 @@ void animations() {
 void applyKeys() {
 	// key input output
 	// WE NEED TO ADD TILT TO THE MOVEMENT AND ALSO MOVE THE LIGTHS ACCORDINGLY
-	if (speedKeys[0] != 0 || speedKeys[1] != 0 || speedKeys[2] != 0 || speedKeys[3] != 0) {
-		float tempAngle = 0.0f;
-		if (speedKeys[2] != 0 || speedKeys[3]) {
-			tempAngle = rotationSpeed * (speedKeys[2] + speedKeys[3]);
-		}
-
-		drone->UpdateLocalTransform(Transform{
-				new Translation{
-				// this is using radians, since later the rotate is also in radians
-				// need to think why it needs to be negative
-					(speedKeys[0] + speedKeys[1]) * speed * cos(-drone->axisRotations[1]),
-					0.0f,
-					(speedKeys[0] + speedKeys[1])* speed * sin(-drone->axisRotations[1])
-				},
-				nullptr,
-				new Rotation{ tempAngle, 0.0f, 1.0f, 0.0f }
-			}
-		);
+	float tempAngle = 0.0f;
+	if (speedKeys[2] != 0 || speedKeys[3]) {
+		tempAngle = rotationSpeed * (speedKeys[2] + speedKeys[3]);
 	}
+
+	float targetSpeed = speedKeys[0] != 0 || speedKeys[1] != 0 ? maxSpeed * (speedKeys[0] + speedKeys[1]) : 0.0f;
+
+	currentSpeed = lerp(currentSpeed, targetSpeed, acceleration);
+
+	drone->UpdateLocalTransform(Transform{
+			new Translation{
+			// this is using radians, since later the rotate is also in radians
+			// need to think why it needs to be negative
+				currentSpeed * cos(-drone->axisRotations[1]),
+				0.0f,
+				currentSpeed * sin(-drone->axisRotations[1])
+			},
+			nullptr,
+			new Rotation{ tempAngle, 0.0f, 1.0f, 0.0f }
+		}
+	);
 }
 
 void renderSim(void) {
