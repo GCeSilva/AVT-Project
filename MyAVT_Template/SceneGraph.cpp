@@ -16,6 +16,16 @@ void SceneGraph::CalculateLights() {
 	}
 }
 
+void SceneGraph::RemoveNode(Node* node) {
+	if (node->GetParent()) {
+		node->GetParent()->RemoveNode(node);
+	}
+	else {
+		head.remove(node);
+	}
+	delete node;
+}
+
 Node* SceneGraph::AddNode(int meshId, int textureId, Transform localTransform, Node* parent) {
 	
 	Node* newNode = new Node(meshId, textureId, localTransform, parent);
@@ -25,6 +35,14 @@ Node* SceneGraph::AddNode(int meshId, int textureId, Transform localTransform, N
 	else 
 		head.push_back(newNode);
 
+	return newNode;
+}
+ObstacleNode* SceneGraph::AddObstacle(int meshId, int textureId, Transform localTransform, std::array<float, 3> centre, Node* parent) {
+	ObstacleNode* newNode = new ObstacleNode(meshId, textureId, localTransform, centre, parent);
+	if (parent)
+		parent->AddChild(newNode);
+	else
+		head.push_back(newNode);
 	return newNode;
 }
 
@@ -127,7 +145,7 @@ std::unordered_map<Objects, Transform> objectTransforms = {
 	{ DRONEBODY, {
 		new Translation{ 0.0f, 3.0f, 0.0f},
 		new Scale{ 1.0f, 0.4f, 0.6f },
-		nullptr
+		new Rotation {0.0f, 0.0f, 0.0f, 0.0f}
 	}},
 };
 

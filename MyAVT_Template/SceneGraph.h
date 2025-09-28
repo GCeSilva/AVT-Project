@@ -5,6 +5,7 @@
 #include "mathUtility.h"
 #include "model.h"
 #include "LightNode.h"
+#include "ObstacleNode.h"
 
 #define NUM_POINT_LIGHTS 6
 #define NUM_SPOT_LIGHTS 2
@@ -34,7 +35,11 @@ public:
 
 	void AddLight(LightNode* light);
 
+	void RemoveNode(Node* node);
 	Node* AddNode(int meshId, int textureId, Transform localTransform, Node* parent = nullptr);
+	//LATER JUST MAKE AN ABSTRACTION SO THAT ADD NODE CAN ADD BOTH NODES
+	ObstacleNode* AddObstacle(int meshId, int textureId, Transform localTransform, std::array<float, 3> centre, Node* parent = nullptr);
+	
 	void DrawScene();
 
 private:

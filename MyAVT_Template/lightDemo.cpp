@@ -29,6 +29,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "SceneGraph.h"
+#include "ObstacleNode.h"
 
 using namespace std;
 
@@ -57,6 +58,10 @@ float currentSpeed = 0.0f;
 float maxSpeed = 0.5f;
 float acceleration = 0.1f;
 float rotationSpeed = 5.0f;
+
+// obstacles
+#define maxObstacles 10
+ObstacleNode* obstacles[maxObstacles];
 	
 // Camera Position
 float camX, camY, camZ;
@@ -75,7 +80,7 @@ char s[32];
 //lights
 // probably at some point remove this from here and put it on its own file or something
 float directionalLightPos[4] = { 1.0f, 1000.0f, 1.0f, 0.0f };
-bool directionalLightMode = false;
+bool directionalLightMode = true;
 
 float pointLightPos[NUM_POINT_LIGHTS][4] = {
 	{  50.0f,  1.0f,   50.0f, 1.0f },
@@ -85,7 +90,7 @@ float pointLightPos[NUM_POINT_LIGHTS][4] = {
 	{   0.0f,  1.0f,    0.0f, 1.0f },
 	{  50.0f,  1.0f,    0.0f, 1.0f }
 };
-bool pointLightMode = false;
+bool pointLightMode = true;
 
 //Spotlight
 float spotLightPos[NUM_SPOT_LIGHTS][4] = {
@@ -184,6 +189,21 @@ void applyKeys() {
 	);
 }
 
+void obstacleBehaviour() {
+
+	for (int i = 0; i < maxObstacles; i++) {
+
+		if (!obstacles[i]) continue;
+
+		bool safe = obstacles[i]->ProcessNode();
+
+		if (!safe) {
+			sg.RemoveNode(obstacles[i]);
+			obstacles[i] = sg.AddObstacle(CUBE, 3, objectTransforms[DRONEBODY], std::array<float, 3> {0.0f, 0.0f, 0.0f});
+		}
+	}
+}
+
 void renderSim(void) {
 
 	FrameCount++;
@@ -202,6 +222,8 @@ void renderSim(void) {
 
 	// set the camera using a function similar to gluLookAt
 	mu.lookAt(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
+
+	obstacleBehaviour();
 
 	animations();
 
@@ -437,6 +459,10 @@ void buildScene()
 		nullptr
 	}, drone);
 
+	//obstacle
+	for (int i = 0; i < maxObstacles; i++) {
+		obstacles[i] = sg.AddObstacle(CUBE, 3, objectTransforms[DRONEBODY], std::array<float, 3> {0.0f, 0.0f, 0.0f});
+	}
 
 	//lights
 	sg.directionalLightMode = directionalLightMode;
@@ -550,6 +576,7 @@ int main(int argc, char **argv) {
 	}
 	ilInit();
 
+	srand((unsigned int)time(NULL));
 	buildScene();
 
 	if(!renderer.setRenderMeshesShaderProg("shaders/mesh_phong.vert", "shaders/mesh_phong.frag") || 

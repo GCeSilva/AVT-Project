@@ -67,7 +67,10 @@ public:
 		}
 
 	}
+
 	void AddChild(Node* child) { this->children.push_back(child); }
+	void RemoveNode(Node* node) { this->children.remove(node); }
+	Node* GetParent() { return this->parent; }
 	std::list<Node*> GetChildren() { return this->children; }
 
 	//since we will be adding upon our local transforms
