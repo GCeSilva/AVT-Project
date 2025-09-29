@@ -29,7 +29,6 @@
 #include "shader.h"
 #include "texture.h"
 #include "SceneGraph.h"
-#include "ObstacleNode.h"
 
 using namespace std;
 
@@ -64,6 +63,7 @@ float rotationSpeed = 5.0f;
 ObstacleNode* obstacles[maxObstacles];
 	
 // Camera Position
+Camera* camera;
 float camX, camY, camZ;
 
 // Camera Spherical Coordinates
@@ -112,17 +112,8 @@ bool fontLoaded = false;
 //
 
 void changeSize(int w, int h) {
-
-	float ratio;
-	// Prevent a divide by zero, when window is too short
-	if(h == 0)
-		h = 1;
-	// set the viewport to be the entire window
-	glViewport(0, 0, w, h);
-	// set the projection matrix
-	ratio = (1.0f * w) / h;
-	mu.loadIdentity(gmu::PROJECTION);
-	mu.perspective(53.13f, ratio, 0.1f, 1000.0f);
+	camera->height = h;
+	camera->width = w;
 }
 
 
@@ -221,9 +212,6 @@ void renderSim(void) {
 	// load identity matrices
 	sg.InitializeSceneGraph();
 
-	// set the camera using a function similar to gluLookAt
-	mu.lookAt(camX, camY, camZ, 0, 0, 0, 0, 1, 0);
-
 	obstacleBehaviour();
 
 	animations();
@@ -286,6 +274,12 @@ void processKeys(unsigned char key, int xx, int yy)
 
 	if (key == 'd') speedKeys[3] = -1;
 
+	if (key == '1') camera->currentState = Camera::FollowPlayerPersp;
+
+	if (key == '2') camera->currentState = Camera::TopDownPersp;
+
+	if (key == '3') camera->currentState = Camera::TopDownOrtho;
+
 	if(key == 'm') glEnable(GL_MULTISAMPLE);
 
 	if(key == 'b') glDisable(GL_MULTISAMPLE);
@@ -293,9 +287,9 @@ void processKeys(unsigned char key, int xx, int yy)
 	if (key == 'r') { //reset
 		alpha = 57.0f; beta = 18.0f;  // Camera Spherical Coordinates
 		r = 45.0f;
-		camX = r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-		camZ = r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-		camY = r * sin(beta * 3.14f / 180.0f);
+		camera->localPosition[0] = r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
+		camera->localPosition[2] = r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
+		camera->localPosition[1] = r * sin(beta * 3.14f / 180.0f);
 	}
 
 }
@@ -319,6 +313,9 @@ void processKeysUp(unsigned char key, int xx, int yy)
 
 void processMouseButtons(int button, int state, int xx, int yy)
 {
+	// no touch-i when not correct state
+	if (camera->currentState != Camera::FollowPlayerPersp) return;
+
 	// start tracking the mouse
 	if (state == GLUT_DOWN)  {
 		startX = xx;
@@ -348,6 +345,8 @@ void processMouseButtons(int button, int state, int xx, int yy)
 
 void processMouseMotion(int xx, int yy)
 {
+	// no touch-i when not correct state
+	if (camera->currentState != Camera::FollowPlayerPersp) return;
 
 	int deltaX, deltaY;
 	float alphaAux, betaAux;
@@ -379,9 +378,9 @@ void processMouseMotion(int xx, int yy)
 			rAux = 0.1f;
 	}
 
-	camX = rAux * sin(alphaAux * 3.14f / 180.0f) * cos(betaAux * 3.14f / 180.0f);
-	camZ = rAux * cos(alphaAux * 3.14f / 180.0f) * cos(betaAux * 3.14f / 180.0f);
-	camY = rAux *   						       sin(betaAux * 3.14f / 180.0f);
+	camera->localPosition[0] = rAux * sin(alphaAux * 3.14f / 180.0f) * cos(betaAux * 3.14f / 180.0f);
+	camera->localPosition[2] = rAux * cos(alphaAux * 3.14f / 180.0f) * cos(betaAux * 3.14f / 180.0f);
+	camera->localPosition[1] = rAux *   						       sin(betaAux * 3.14f / 180.0f);
 
 //  uncomment this if not using an idle or refresh func
 //	glutPostRedisplay();
@@ -389,14 +388,16 @@ void processMouseMotion(int xx, int yy)
 
 
 void mouseWheel(int wheel, int direction, int x, int y) {
+	// no touch-i when not correct state
+	if (camera->currentState != Camera::FollowPlayerPersp) return;
 
 	r -= direction * 1.0f;
 	if (r < 0.1f)
 		r = 0.1f;
 
-	camX = r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-	camZ = r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-	camY = r *   						     sin(beta * 3.14f / 180.0f);
+	camera->localPosition[0] = r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
+	camera->localPosition[2] = r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
+	camera->localPosition[1] = r *   						     sin(beta * 3.14f / 180.0f);
 
 //  uncomment this if not using an idle or refresh func
 //	glutPostRedisplay();
@@ -481,6 +482,17 @@ void buildScene()
 		sg.AddLight(new SpotLightNode(spotLightPos[i], coneDir[i], cutOff[i], drone));
 	}
 
+	//camera
+	float pos[3] = {
+		r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f),
+		r * sin(beta * 3.14f / 180.0f),
+		r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f)
+	};
+	float target[3] = { 0.0f, 0.0f, 0.0f };
+	camera = new Camera{ pos, target, drone };
+
+	sg.activeCamera = camera;
+
 	//The truetypeInit creates a texture object in TexObjArray for storing the fontAtlasTexture
 	
 	fontLoaded = renderer.truetypeInit(fontPathFile);
@@ -490,11 +502,6 @@ void buildScene()
 		cerr << "Fonts loaded\n";
 
 	printf("\nNumber of Texture Objects is %d\n\n", renderer.TexObjArray.getNumTextureObjects());
-
-	// set the camera position based on its spherical coordinates
-	camX = r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-	camZ = r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-	camY = r * sin(beta * 3.14f / 180.0f);
 }
 
 /// ::::::::::::::::::::::::::::::::::::::::::::::::CALLBACK FUNCIONS:::::::::::::::::::::::::::::::::::::::::::::::::://///

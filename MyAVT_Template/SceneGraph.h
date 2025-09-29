@@ -6,6 +6,7 @@
 #include "model.h"
 #include "LightNode.h"
 #include "ObstacleNode.h"
+#include "Camera.h"
 
 #define NUM_POINT_LIGHTS 6
 #define NUM_SPOT_LIGHTS 2
@@ -30,6 +31,8 @@ public:
 	bool spotLightMode;
 	bool pointLightMode;
 	bool directionalLightMode;
+
+	Camera* activeCamera = nullptr;
 
 	void InitializeSceneGraph();
 

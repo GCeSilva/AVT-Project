@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="basic_geometry.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="lightDemo.cpp" />
     <ClCompile Include="LightNode.cpp" />
     <ClCompile Include="mathUtility.cpp" />
@@ -178,6 +179,7 @@
     <None Include="shaders\ttf.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="LightNode.h" />
     <ClInclude Include="mathUtility.h" />

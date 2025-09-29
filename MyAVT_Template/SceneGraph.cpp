@@ -53,6 +53,7 @@ void SceneGraph::AddLight(LightNode* light) {
 void SceneGraph::DrawScene() {
 
 	//Cameras
+	activeCamera->RenderCamera();
 
 	//Lights
 	CalculateLights();
