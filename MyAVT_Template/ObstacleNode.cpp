@@ -13,7 +13,7 @@ bool ObstacleNode::ProcessNode() {
 				moveSpeed * (float)sin(-moveDirection)
 			},
 			nullptr,
-			nullptr
+			new Rotation{ 45.0f, 0.0f, 1.0f, 0.0f }
 		}
 	);
 

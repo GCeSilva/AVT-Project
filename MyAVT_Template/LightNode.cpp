@@ -9,11 +9,20 @@ void PointLightNode::CalculateLight(int* shaderArrayIndex) {
 	if (parent) {
 		float tempPointLight[4] = {};
 
+		Node* tempParent = parent;
+		while (tempParent != nullptr) {
+			tempPointLight[0] += (*tempParent->localTransform.translation)[0];
+			tempPointLight[1] += (*tempParent->localTransform.translation)[1];
+			tempPointLight[2] += (*tempParent->localTransform.translation)[2];
+
+			tempParent = tempParent->GetParent();
+		}
+
 		//i wish there were a better way to do this
-		tempPointLight[0] = (*parent->localTransform.translation)[0] + position[0];
-		tempPointLight[1] = (*parent->localTransform.translation)[0] + position[1];
-		tempPointLight[2] = (*parent->localTransform.translation)[0] + position[2];
-		tempPointLight[3] = (*parent->localTransform.translation)[0] + position[3];
+		tempPointLight[0] += position[0];
+		tempPointLight[1] += position[1];
+		tempPointLight[2] += position[2];
+		tempPointLight[3] = position[3];
 
 		renderer.SetPointLights(&tempPointLight, shaderArrayIndex);
 	}
@@ -32,9 +41,26 @@ void SpotLightNode::CalculateLight(int* shaderArrayIndex) {
 			float tempSpotLight[4] = {};
 			float tempConeDir[4] = {};
 
-			tempSpotLight[0] = position[0] + (*parent->localTransform.translation)[0];
-			tempSpotLight[1] = position[1] + (*parent->localTransform.translation)[1];
-			tempSpotLight[2] = position[2] + (*parent->localTransform.translation)[2];
+			float tempAxisRot[3] = {};
+
+			//full parent inheritance
+			Node* tempParent = parent;
+			while (tempParent != nullptr) {
+				tempSpotLight[0] += (*tempParent->localTransform.translation)[0];
+				tempSpotLight[1] += (*tempParent->localTransform.translation)[1];
+				tempSpotLight[2] += (*tempParent->localTransform.translation)[2];
+
+				tempAxisRot[0] = tempParent->axisRotations[0];
+				tempAxisRot[1] = tempParent->axisRotations[1];
+				tempAxisRot[2] = tempParent->axisRotations[2];
+
+				tempParent = tempParent->GetParent();
+			}
+
+
+			tempSpotLight[0] += position[0];
+			tempSpotLight[1] += position[1];
+			tempSpotLight[2] += position[2];
 			tempSpotLight[3] = position[3];
 
 			// later turn this into proper spherical coordinates
@@ -43,13 +69,13 @@ void SpotLightNode::CalculateLight(int* shaderArrayIndex) {
 			// so there is never a conversion, and since the rotate function uses radians, we need to convert them back
 			// negative, same thing that i need to think about to understand why
 			//x
-			tempConeDir[0] = coneDirection[0] + cos(-parent->axisRotations[1]) / (PI / 180.0f);
+			tempConeDir[0] = coneDirection[0] + cos(-tempAxisRot[1]) / (PI / 180.0f);
 			//y
 			// adding this one was fairly simple, just wonder if we might have issues later on
 			// since this is not a full spherical coordinate system
-			tempConeDir[1] = coneDirection[1] + sin(parent->axisRotations[2]) / (PI / 180.0f);
+			tempConeDir[1] = coneDirection[1] + sin(tempAxisRot[2]) / (PI / 180.0f);
 			//z
-			tempConeDir[2] = coneDirection[2] + sin(-parent->axisRotations[1]) / (PI / 180.0f);
+			tempConeDir[2] = coneDirection[2] + sin(-tempAxisRot[1]) / (PI / 180.0f);
 			//not used
 			tempConeDir[3] = coneDirection[3];
 

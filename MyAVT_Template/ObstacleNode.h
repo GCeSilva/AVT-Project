@@ -1,6 +1,8 @@
 #pragma once
 #include "Node.h"
 
+
+//ADD PROPER HIERITANCE OF TRANSFORMATIONS(????)
 class ObstacleNode : public Node
 {
 public:
