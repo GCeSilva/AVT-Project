@@ -212,10 +212,11 @@ void renderSim(void) {
 	renderer.activateRenderMeshesShaderProg(); // use the required GLSL program to draw the meshes with illumination
 
 	//Associar os Texture Units aos Objects Texture
-	//stone.tga loaded in TU0; checker.tga loaded in TU1;  lightwood.tga loaded in TU2
+	//stone.tga loaded in TU0; checker.tga loaded in TU1;  lightwood.tga loaded in TU2 ; mosaic.tga loaded in TU3
 	renderer.setTexUnit(0, 0);
 	renderer.setTexUnit(1, 1);
 	renderer.setTexUnit(2, 2);
+	renderer.setTexUnit(3, 3);
 
 	// load identity matrices
 	sg.InitializeSceneGraph();
@@ -412,6 +413,7 @@ void buildScene()
 	renderer.TexObjArray.texture2D_Loader("assets/stone.tga");
 	renderer.TexObjArray.texture2D_Loader("assets/checker.png");
 	renderer.TexObjArray.texture2D_Loader("assets/lightwood.tga");
+	renderer.TexObjArray.texture2D_Loader("assets/mosaic.tga");
 
 	//Scene geometry with triangle meshes
 
