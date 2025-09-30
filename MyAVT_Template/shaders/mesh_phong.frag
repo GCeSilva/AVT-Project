@@ -37,6 +37,7 @@ uniform float spotCosCutOff[NUMBER_SPOT_LIGHTS];
 uniform bool pointLightMode;
 uniform bool spotLightsOn;
 uniform bool dirLightMode;
+uniform bool fogMode;
 
 out vec4 colorOut;
 
@@ -111,24 +112,35 @@ void main() {
 		}
 	}
 
+	vec4 color = vec4(0.0);
 
 	if(texMode == 0)	//no texturing
-		colorOut = vec4(max(intensitySum * mat.diffuse + specSum, mat.ambient).rgb, 1.0);
+		color = vec4(max(intensitySum * mat.diffuse + specSum, mat.ambient).rgb, 1.0);
 
 	else if(texMode == 1) // modulate diffuse color with texel color
 	{
 		texel = texture(texmap2, DataIn.tex_coord);  // texel from lighwood.tga
-		colorOut = vec4(max(intensitySum * mat.diffuse * texel + specSum, 0.07 * texel).rgb, 1.0);
+		color = vec4(max(intensitySum * mat.diffuse * texel + specSum, 0.07 * texel).rgb, 1.0);
 	}
 	else if (texMode == 2) // diffuse color is replaced by texel color
 	{
 		texel = texture(texmap, DataIn.tex_coord);  // texel from stone.tga
-		colorOut = vec4(max(intensitySum * texel + specSum, 0.07 * texel).rgb, 1.0);
+		color = vec4(max(intensitySum * texel + specSum, 0.07 * texel).rgb, 1.0);
 	}
 	else // multitexturing
 	{
 		texel = texture(texmap2, DataIn.tex_coord);  // texel from lighwood.tga
 		texel1 = texture(texmap1, DataIn.tex_coord);  // texel from checker.tga
-		colorOut = vec4(max(intensitySum * texel * texel1 + specSum, 0.07 * texel *texel1).rgb, 1.0);
+		color = vec4(max(intensitySum * texel * texel1 + specSum, 0.07 * texel *texel1).rgb, 1.0);
 	}
+	
+	if(fogMode){
+		float dist = length(-DataIn.eye);
+		float fogAmount = exp(-dist*0.1);
+		vec3 fogColor = vec3(0.5,0.6,0.7);
+		color = vec4(mix(fogColor, color.rgb, fogAmount), 1.0);
+	}
+
+	colorOut = color;
+	
 }

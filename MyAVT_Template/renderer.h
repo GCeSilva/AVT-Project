@@ -62,7 +62,7 @@ public:
   void setSpotLightMode(bool spotLightMode);
   void SetSpotLights(float (*spotLightPos)[4], int* shaderArrayIndex);
   void setSpotParam(float (*coneDir)[4], float cutOff, int* shaderArrayIndex);
-
+  void setFogMode(bool fogMode);
 
   void setTexUnit(int tuId, int texObjId);
 

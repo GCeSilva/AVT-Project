@@ -31,6 +31,7 @@ public:
 	bool spotLightMode;
 	bool pointLightMode;
 	bool directionalLightMode;
+	bool fogMode;
 
 	Camera* activeCamera = nullptr;
 

@@ -224,6 +224,14 @@ void Renderer::SetDirectionalLightMode(bool dirLightMode) {
     else
         glUniform1i(loc, 0);
 }
+void Renderer::setFogMode(bool fogMode) {
+    GLint loc;
+    loc = glGetUniformLocation(program, "fogMode");
+    if (fogMode)
+        glUniform1i(loc, 1);
+    else
+        glUniform1i(loc, 0);
+}
 
 //Later change the argument to something better and generic
 void Renderer::SetPointLights(float (*pointLights)[4], int* shaderArrayIndex) {

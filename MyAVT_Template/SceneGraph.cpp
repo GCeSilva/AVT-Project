@@ -7,6 +7,7 @@ void SceneGraph::InitializeSceneGraph() {
 	renderer.SetPointLightsMode(pointLightMode);
 	renderer.SetDirectionalLightMode(directionalLightMode);
 	renderer.setSpotLightMode(spotLightMode);
+	renderer.setFogMode(fogMode);
 }
 void SceneGraph::CalculateLights() {
 

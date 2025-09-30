@@ -104,6 +104,8 @@ float coneDir[NUM_SPOT_LIGHTS][4] = {
 float cutOff[NUM_SPOT_LIGHTS] = { 0.93f, 0.93f };
 bool spotLightMode = true;
 
+bool fogMode = false;
+
 bool fontLoaded = false;
 
 // ------------------------------------------------------------
@@ -471,6 +473,8 @@ void buildScene()
 	sg.directionalLightMode = directionalLightMode;
 	sg.pointLightMode = pointLightMode;
 	sg.spotLightMode = spotLightMode;
+	// fog
+	sg.fogMode = fogMode;
 
 	for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
 		sg.AddLight(new PointLightNode(pointLightPos[i]));
