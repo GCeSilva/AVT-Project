@@ -268,6 +268,8 @@ void processKeys(unsigned char key, int xx, int yy)
 
 	if(key == 'h') sg.spotLightMode = !sg.spotLightMode;
 
+	if (key == 'f') sg.fogMode = !sg.fogMode;
+
 	if (key == 'w') speedKeys[0] = 1;
 
 	if (key == 'a') speedKeys[2] = 1;
