@@ -429,7 +429,12 @@ void buildScene()
 	);
 
 	//floor
-	sg.AddNode(QUAD, 0, objectTransforms[FLOOR]);
+	sg.AddNode(CUBE, 3, Transform{
+		nullptr,
+		new Scale{ 1000.0f, 1000.0f, 0.5f },
+		new Rotation{ -90.0f, 1.0f, 0.0f, 0.0f }
+		}
+	);
 	
 	// buildings
 	std::array<int, 2> domainX = {-2, 2};
@@ -441,23 +446,23 @@ void buildScene()
 	CreateCity(&sg, domainX, domainY, blockSize, dbb, pdb);
 
 	//drone
-	drone = sg.AddNode(CUBE, 3, objectTransforms[DRONEBODY]);
-	sg.AddNode(CUBE, 3, Transform{
+	drone = sg.AddNode(CUBE, 4, objectTransforms[DRONEBODY]);
+	sg.AddNode(CUBE, 4, Transform{
 		new Translation{1.0f, 1.0f, 1.0f},
 		new Scale{0.2f, 0.2f, 0.2f},
 		nullptr
 	}, drone);
-	sg.AddNode(CUBE, 3, Transform{
+	sg.AddNode(CUBE, 4, Transform{
 		new Translation{1.0f, 1.0f, -1.0f},
 		new Scale{0.2f, 0.2f, 0.2f},
 		nullptr
 	}, drone);
-	sg.AddNode(CUBE, 3, Transform{
+	sg.AddNode(CUBE, 4, Transform{
 		new Translation{-1.0f, 1.0f, 1.0f},
 		new Scale{0.2f, 0.2f, 0.2f},
 		nullptr
 	}, drone);
-	sg.AddNode(CUBE, 3, Transform{
+	sg.AddNode(CUBE, 4, Transform{
 		new Translation{-1.0f, 1.0f, -1.0f},
 		new Scale{0.2f, 0.2f, 0.2f},
 		nullptr
