@@ -12,16 +12,17 @@ public:
 		TopDownOrtho
 	};
 
-	float localPosition[3] = {0.0f, 0.0f, 0.0f};
 	float lookTarget[3] = { 0.0f, 0.0f, 0.0f };
 	float height = 0.0f, width = 0.0f;
+
+	float radious = 45.0f;
+	float localRotation[3] = { 18.0f, 0.0f, -90.0f };
 
 	CameraState currentState = FollowPlayerPersp;
 
 	Node* parent = nullptr;
 
-	Camera(float pos[3], float target[3], Node* parent = nullptr) {
-		memcpy(localPosition, pos, sizeof(float) * 3);
+	Camera(float target[3], Node* parent = nullptr) {
 		memcpy(lookTarget, target, sizeof(float) * 3);
 
 		this->parent = parent;

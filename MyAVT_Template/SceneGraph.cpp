@@ -75,7 +75,6 @@ void SceneGraph::DrawNode(Node* node) {
 		mu.translate(gmu::MODEL, (*node->localTransform.translation)[0], (*node->localTransform.translation)[1], (*node->localTransform.translation)[2]);
 
 	if (node->localTransform.rotation) {
-
 		//rotate assumes that the angle is in degrees
 		mu.rotate(gmu::MODEL, node->axisRotations[1] / (PI / 180.0f), 0.0f, 1.0f, 0.0f);
 		mu.rotate(gmu::MODEL, node->axisRotations[2] / (PI / 180.0f), 0.0f, 0.0f, 1.0f);

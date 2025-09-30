@@ -64,7 +64,6 @@ ObstacleNode* obstacles[maxObstacles];
 	
 // Camera Position
 Camera* camera;
-float camX, camY, camZ;
 
 // Camera Spherical Coordinates
 float alpha = 57.0f, beta = 18.0f;
@@ -104,7 +103,7 @@ float coneDir[NUM_SPOT_LIGHTS][4] = {
 float cutOff[NUM_SPOT_LIGHTS] = { 0.93f, 0.93f };
 bool spotLightMode = true;
 
-bool fogMode = false;
+bool fogMode = true;
 
 bool fontLoaded = false;
 
@@ -180,6 +179,7 @@ void applyKeys() {
 			new Rotation{ tempAngle, 0.0f, 1.0f, 0.0f }
 		}
 	);
+
 }
 
 void obstacleBehaviour() {
@@ -291,11 +291,10 @@ void processKeys(unsigned char key, int xx, int yy)
 	if (key == 'r') { //reset
 		alpha = 57.0f; beta = 18.0f;  // Camera Spherical Coordinates
 		r = 45.0f;
-		camera->localPosition[0] = r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-		camera->localPosition[2] = r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-		camera->localPosition[1] = r * sin(beta * 3.14f / 180.0f);
+		camera->radious = r = 45.0f;
+		camera->localRotation[2] = alpha = -90.0f;
+		camera->localRotation[0] = beta = 18.0f;
 	}
-
 }
 
 void processKeysUp(unsigned char key, int xx, int yy)
@@ -382,9 +381,9 @@ void processMouseMotion(int xx, int yy)
 			rAux = 0.1f;
 	}
 
-	camera->localPosition[0] = rAux * sin(alphaAux * 3.14f / 180.0f) * cos(betaAux * 3.14f / 180.0f);
-	camera->localPosition[2] = rAux * cos(alphaAux * 3.14f / 180.0f) * cos(betaAux * 3.14f / 180.0f);
-	camera->localPosition[1] = rAux *   						       sin(betaAux * 3.14f / 180.0f);
+	camera->localRotation[0] = betaAux;
+	camera->localRotation[2] = alphaAux;
+	camera->radious = rAux;
 
 //  uncomment this if not using an idle or refresh func
 //	glutPostRedisplay();
@@ -399,9 +398,7 @@ void mouseWheel(int wheel, int direction, int x, int y) {
 	if (r < 0.1f)
 		r = 0.1f;
 
-	camera->localPosition[0] = r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-	camera->localPosition[2] = r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f);
-	camera->localPosition[1] = r *   						     sin(beta * 3.14f / 180.0f);
+	camera->radious = r;
 
 //  uncomment this if not using an idle or refresh func
 //	glutPostRedisplay();
@@ -489,13 +486,12 @@ void buildScene()
 	}
 
 	//camera
-	float pos[3] = {
-		r * sin(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f),
-		r * sin(beta * 3.14f / 180.0f),
-		r * cos(alpha * 3.14f / 180.0f) * cos(beta * 3.14f / 180.0f)
-	};
 	float target[3] = { 0.0f, 0.0f, 0.0f };
-	camera = new Camera{ pos, target, drone };
+	camera = new Camera{ target, drone };
+	//little hack
+	alpha = camera->localRotation[2];
+	beta = camera->localRotation[0];
+	r = camera->radious;
 
 	sg.activeCamera = camera;
 
@@ -576,7 +572,7 @@ int main(int argc, char **argv) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
-	glClearColor(3.0f/255.0f, 252.0f/255.0f, 252.0f/255.0f, 1.0f);
+	glClearColor(0.5, 0.6, 0.7, 1.0f);
 
 	printf ("Vendor: %s\n", glGetString (GL_VENDOR));
 	printf ("Renderer: %s\n", glGetString (GL_RENDERER));
