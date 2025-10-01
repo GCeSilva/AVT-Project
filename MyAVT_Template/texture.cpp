@@ -27,7 +27,7 @@ void Texture::texture2D_Loader(const char *strFileName)
 		exit(0);
 	}
 
-	ilConvertImage(GL_RGBA, GL_UNSIGNED_BYTE);  //Image converted to GL_RGBA  of type unsigned byte
+	ilConvertImage(GL_RGBA, GL_UNSIGNED_BYTE);  //Image converted to GL_RGBA of type unsigned byte
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE, ilGetData());
 	ilDeleteImages(1, &ImageId);

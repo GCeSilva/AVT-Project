@@ -429,12 +429,7 @@ void buildScene()
 	);
 
 	//floor
-	sg.AddNode(CUBE, 3, Transform{
-		nullptr,
-		new Scale{ 1000.0f, 1000.0f, 0.5f },
-		new Rotation{ -90.0f, 1.0f, 0.0f, 0.0f }
-		}
-	);
+	sg.AddNode(QUAD, 3, objectTransforms[FLOOR]);
 	
 	// buildings
 	std::array<int, 2> domainX = {-2, 2};
