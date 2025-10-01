@@ -51,7 +51,7 @@ SceneGraph sg;
 Node* drone;
 
 // Controls
-std::array<int, 4> speedKeys;
+std::array<int, 8> speedKeys;
 // SPEED IS MEANT TO INCREMENT AND DECREMENT AS WE CLICK THE KEYS
 float currentSpeed = 0.0f;
 float maxSpeed = 0.5f;
@@ -82,12 +82,12 @@ float directionalLightPos[4] = { 1.0f, 1000.0f, 1.0f, 0.0f };
 bool directionalLightMode = true;
 
 float pointLightPos[NUM_POINT_LIGHTS][4] = {
-	{  50.0f,  1.0f,   50.0f, 1.0f },
-	{ -50.0f,  1.0f,   50.0f, 1.0f },
-	{  50.0f,  1.0f,  -50.0f, 1.0f },
-	{ -50.0f,  1.0f,  -50.0f, 1.0f },
-	{   0.0f,  1.0f,    0.0f, 1.0f },
-	{  50.0f,  1.0f,    0.0f, 1.0f }
+	{  5.0f,  10.0f,   5.0f, 1.0f },
+	{ -5.0f,  10.0f,   5.0f, 1.0f },
+	{  5.0f,  10.0f,  -5.0f, 1.0f },
+	{ -5.0f,  10.0f,  -5.0f, 1.0f },
+	{   0.0f,  10.0f,    0.0f, 1.0f },
+	{  5.0f,  10.0f,    0.0f, 1.0f }
 };
 bool pointLightMode = true;
 
@@ -153,8 +153,17 @@ void animations() {
 	else {
 		drone->axisRotations[0] = lerp(drone->axisRotations[0], 0, animSpeed);
 	}
+
+	if (speedKeys[6] != 0 || speedKeys[7] != 0) {
+		drone->axisRotations[0] = lerp(drone->axisRotations[0], -(speedKeys[6] + speedKeys[7]) * tiltAngle, animSpeed);
+	}
+	else {
+		drone->axisRotations[0] = lerp(drone->axisRotations[0], 0, animSpeed);
+	}
 }
 
+float currentUp = 0.0f;
+float currentSide = 0.0f;
 void applyKeys() {
 	// key input output
 	// WE NEED TO ADD TILT TO THE MOVEMENT AND ALSO MOVE THE LIGTHS ACCORDINGLY
@@ -165,21 +174,28 @@ void applyKeys() {
 
 	float targetSpeed = speedKeys[0] != 0 || speedKeys[1] != 0 ? maxSpeed * (speedKeys[0] + speedKeys[1]) : 0.0f;
 
+	float upSpeed = speedKeys[4] != 0 || speedKeys[5] != 0 ? maxSpeed * (speedKeys[4] + speedKeys[5]) : 0.0f;
+
+	float sideSpeed = speedKeys[6] != 0 || speedKeys[7] != 0 ? maxSpeed * (speedKeys[6] + speedKeys[7]) : 0.0f;
+
 	currentSpeed = lerp(currentSpeed, targetSpeed, acceleration);
+
+	currentUp = lerp(currentUp, upSpeed, acceleration);
+
+	currentSide = lerp(currentSide, sideSpeed, acceleration);
 
 	drone->UpdateLocalTransform(Transform{
 			new Translation{
 			// this is using radians, since later the rotate is also in radians
 			// need to think why it needs to be negative
-				currentSpeed * cos(-drone->axisRotations[1]),
-				0.0f,
-				currentSpeed * sin(-drone->axisRotations[1])
+				currentSpeed * cos(-drone->axisRotations[1]) + currentSide * sin(drone->axisRotations[1]),
+				currentUp,
+				currentSpeed * sin(-drone->axisRotations[1]) + currentSide * cos(drone->axisRotations[1])
 			},
 			nullptr,
 			new Rotation{ tempAngle, 0.0f, 1.0f, 0.0f }
 		}
 	);
-
 }
 
 void obstacleBehaviour() {
@@ -258,6 +274,23 @@ void renderSim(void) {
 // Events from the Keyboard
 //
 
+void SpecialInput(int key, int x, int y) {
+
+	//pitch
+	if (key == GLUT_KEY_UP)
+		speedKeys[0] = 1;
+
+	if (key == GLUT_KEY_DOWN)
+		speedKeys[1] = -1;
+
+	if (key == GLUT_KEY_RIGHT)
+		speedKeys[6] = 1;
+
+	if (key == GLUT_KEY_LEFT)
+		speedKeys[7] = -1;
+		
+}
+
 void processKeys(unsigned char key, int xx, int yy)
 {
 	if(key == 27) glutLeaveMainLoop();
@@ -270,13 +303,17 @@ void processKeys(unsigned char key, int xx, int yy)
 
 	if (key == 'f') sg.fogMode = !sg.fogMode;
 
-	if (key == 'w') speedKeys[0] = 1;
 
+	// up and own keys
+	if (key == 'w') speedKeys[4] = 1;
+
+	if (key == 's') speedKeys[5] = -1;
+
+	//yaw
 	if (key == 'a') speedKeys[2] = 1;
 
-	if (key == 's') speedKeys[1] = -1;
-
 	if (key == 'd') speedKeys[3] = -1;
+
 
 	if (key == '1') camera->currentState = Camera::FollowPlayerPersp;
 
@@ -296,12 +333,26 @@ void processKeys(unsigned char key, int xx, int yy)
 		camera->localRotation[0] = beta = 18.0f;
 	}
 }
+void SpecialInputUp(int key, int x, int y) {
+	//pitch
+	if (key == GLUT_KEY_UP)
+		speedKeys[0] = 0;
+
+	if (key == GLUT_KEY_DOWN)
+		speedKeys[1] = 0;
+
+	if (key == GLUT_KEY_RIGHT)
+		speedKeys[6] = 0;
+
+	if (key == GLUT_KEY_LEFT)
+		speedKeys[7] = 0;
+}
 
 void processKeysUp(unsigned char key, int xx, int yy)
 {
-	if (key == 'w') speedKeys[0] = 0;
+	if (key == 'w') speedKeys[4] = 0;
 
-	if (key == 's') speedKeys[1] = 0;
+	if (key == 's') speedKeys[5] = 0;
 
 	if (key == 'a') speedKeys[2] = 0;
 
@@ -567,6 +618,8 @@ int main(int argc, char **argv) {
 //	Mouse and Keyboard Callbacks
 	glutKeyboardFunc(processKeys);
 	glutKeyboardUpFunc(processKeysUp);
+	glutSpecialFunc(SpecialInput);
+	glutSpecialUpFunc(SpecialInputUp);
 
 	glutMouseFunc(processMouseButtons);
 	glutMotionFunc(processMouseMotion);
