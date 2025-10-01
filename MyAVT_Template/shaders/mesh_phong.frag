@@ -67,8 +67,8 @@ void main() {
 			spec = mat.specular * pow(intSpec, mat.shininess);
 		}
 
-		intensitySum += intensity / NUMBER_POINT_LIGHTS;
-		specSum += spec / NUMBER_POINT_LIGHTS;
+		intensitySum += intensity;
+		specSum += spec;
 	}
 
 	if(pointLightMode){
@@ -84,8 +84,8 @@ void main() {
 				spec = mat.specular * pow(intSpec, mat.shininess);
 			}
 
-			intensitySum += intensity / NUMBER_POINT_LIGHTS;
-			specSum += spec / NUMBER_POINT_LIGHTS;
+			intensitySum += intensity / 3;
+			specSum += spec / 3;
 		}
 	}
 
@@ -107,8 +107,8 @@ void main() {
 					intSpec = max(dot(h,n), 0.0);
 					spec = mat.specular * pow(intSpec, mat.shininess) * att;
 				}
-				intensitySum += intensity / NUMBER_SPOT_LIGHTS;
-				specSum += spec / NUMBER_SPOT_LIGHTS;
+				intensitySum += intensity;
+				specSum += spec;
 			}
 		}
 	}
