@@ -67,6 +67,7 @@ enum Mesh {
 };
 enum MaterialConfigs {
 	DEFAULT,
+	NOT_DEFAULT
 };
 
 void createGeometry(MyMesh amesh, Material mat);
@@ -77,7 +78,8 @@ extern std::unordered_map<Mesh, std::function<MyMesh()>> meshCreators;
 enum Objects {
 	FLOOR,
 	BUILDING,
-	DRONEBODY
+	DRONEBODY,
+	BIGBALL
 };
 extern std::unordered_map<Objects, Transform> objectTransforms;
 

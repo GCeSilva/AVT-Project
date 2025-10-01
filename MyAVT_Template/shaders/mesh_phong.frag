@@ -116,35 +116,35 @@ void main() {
 	vec4 color = vec4(0.0);
 
 	if(texMode == 0)	//no texturing
-		color = vec4(max(intensitySum * mat.diffuse + specSum, mat.ambient).rgb, 1.0);
+		color = vec4(max(intensitySum * mat.diffuse + specSum, mat.ambient).rgb, mat.diffuse.a);
 
 	else if(texMode == 1) // modulate diffuse color with texel color
 	{
 		texel = texture(texmap2, DataIn.tex_coord);  // texel from lighwood.tga
-		color = vec4(max(intensitySum * mat.diffuse * texel + specSum, 0.07 * texel).rgb, 1.0);
+		color = vec4(max(intensitySum * mat.diffuse * texel + specSum, 0.07 * texel).rgb, mat.diffuse.a);
 	}
 	else if (texMode == 2) // diffuse color is replaced by texel color
 	{
 		texel = texture(texmap, DataIn.tex_coord);  // texel from stone.tga
-		color = vec4(max(intensitySum * texel + specSum, 0.07 * texel).rgb, 1.0);
+		color = vec4(max(intensitySum * texel + specSum, 0.07 * texel).rgb, mat.diffuse.a);
 	}
 	else if (texMode == 3)
 	{
 		texel = texture(texmap3, DataIn.tex_coord);  // texel from mosaic.tga
-		color = vec4(max(intensitySum * texel + specSum, 0.07 * texel).rgb, 1.0);
+		color = vec4(max(intensitySum * texel + specSum, 0.07 * texel).rgb, mat.diffuse.a);
 	}
 	else // multitexturing
 	{
 		texel = texture(texmap2, DataIn.tex_coord);  // texel from lighwood.tga
 		texel1 = texture(texmap1, DataIn.tex_coord);  // texel from checker.tga
-		color = vec4(max(intensitySum * texel * texel1 + specSum, 0.07 * texel *texel1).rgb, 1.0);
+		color = vec4(max(intensitySum * texel * texel1 + specSum, 0.07 * texel *texel1).rgb, mat.diffuse.a);
 	}
 	
 	if(fogMode){
 		float dist = length(-DataIn.eye);
 		float fogAmount = exp(-dist*0.02);
 		vec3 fogColor = vec3(0.5,0.6,0.7);
-		color = vec4(mix(fogColor, color.rgb, fogAmount), 1.0);
+		color = vec4(mix(fogColor, color.rgb, fogAmount), mat.diffuse.a);
 	}
 
 	colorOut = color;

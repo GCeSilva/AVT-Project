@@ -129,6 +129,14 @@ std::unordered_map<MaterialConfigs, Material> meshMaterials = {
 		100.0f, // Shininess
 		0 // Texture Count
 	}},
+	{ NOT_DEFAULT, {
+		{ 0.3f, 0.0f, 0.0f, 0.5f }, // Ambient
+		{ 0.8f, 0.1f, 0.1f, 0.5f }, // Diffuse
+		{ 0.3f, 0.3f, 0.3f, 0.5f }, // Specular
+		{ 0.0f, 0.0f, 0.0f, 0.5f }, // Emissive
+		100.0f, // Shininess
+		0 // Texture Count
+	}}
 };
 
 // pre set objects
@@ -148,6 +156,11 @@ std::unordered_map<Objects, Transform> objectTransforms = {
 		new Scale{ 1.0f, 0.4f, 0.6f },
 		new Rotation {0.0f, 0.0f, 0.0f, 0.0f}
 	}},
+	{ BIGBALL, {
+		new Translation{0.0f, 15.0f, 0.0f},
+		new	Scale{5.0f, 5.0f, 5.0f},
+		nullptr
+	}}
 };
 
 // helper functions

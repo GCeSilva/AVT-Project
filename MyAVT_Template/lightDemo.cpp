@@ -427,10 +427,14 @@ void buildScene()
 		meshCreators[CUBE](),
 		meshMaterials[DEFAULT]
 	);
+	createGeometry(
+		meshCreators[SPHERE](),
+		meshMaterials[NOT_DEFAULT]
+	);
 
 	//floor
 	sg.AddNode(QUAD, 3, objectTransforms[FLOOR]);
-	
+
 	// buildings
 	std::array<int, 2> domainX = {-2, 2};
 	std::array<int, 2> domainY = { -2, 2 };
@@ -467,6 +471,14 @@ void buildScene()
 	for (int i = 0; i < maxObstacles; i++) {
 		obstacles[i] = sg.AddObstacle(CUBE, 3, objectTransforms[DRONEBODY], std::array<float, 3> {0.0f, 0.0f, 0.0f});
 	}
+
+	//BigBall
+	sg.AddNode(SPHERE, 2, Transform{
+		new Translation{0.0f, 15.0f, 0.0f},
+		new	Scale{5.0f, 5.0f, 5.0f},
+		nullptr
+		}
+	);
 
 	//lights
 	sg.directionalLightMode = directionalLightMode;
