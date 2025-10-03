@@ -136,29 +136,29 @@ void animations() {
 		child->UpdateLocalTransform(Transform{
 			nullptr,
 			nullptr,
-			new Rotation{ 5.0f, 0.0f, 1.0f, 0.0f }
+			new vec3{ 0.0f, 5.0f, 0.0f }
 			});
 	}
 
 	if (speedKeys[0] != 0 || speedKeys[1] != 0) {
 		// never forgeti, this is in radians
-		drone->axisRotations[2] = lerp(drone->axisRotations[2], (speedKeys[1] + speedKeys[0]) * tiltAngle, animSpeed);
+		(*drone->localTransform.rotation)[2] = lerp((*drone->localTransform.rotation)[2], (speedKeys[1] + speedKeys[0]) * tiltAngle, animSpeed);
 	}
 	else {
-		drone->axisRotations[2] = lerp( drone->axisRotations[2], 0, animSpeed);
+		(*drone->localTransform.rotation)[2] = lerp((*drone->localTransform.rotation)[2], 0, animSpeed);
 	}
 	if (speedKeys[2] != 0 || speedKeys[3] != 0) {
-		drone->axisRotations[0] = lerp(drone->axisRotations[0], (speedKeys[3] + speedKeys[2]) * sideTiltAngle, animSpeed);
+		(*drone->localTransform.rotation)[0] = lerp((*drone->localTransform.rotation)[0], (speedKeys[3] + speedKeys[2]) * sideTiltAngle, animSpeed);
 	}
 	else {
-		drone->axisRotations[0] = lerp(drone->axisRotations[0], 0, animSpeed);
+		(*drone->localTransform.rotation)[0] = lerp((*drone->localTransform.rotation)[0], 0, animSpeed);
 	}
 
 	if (speedKeys[6] != 0 || speedKeys[7] != 0) {
-		drone->axisRotations[0] = lerp(drone->axisRotations[0], -(speedKeys[6] + speedKeys[7]) * tiltAngle, animSpeed);
+		(*drone->localTransform.rotation)[0] = lerp((*drone->localTransform.rotation)[0], -(speedKeys[6] + speedKeys[7]) * tiltAngle, animSpeed);
 	}
 	else {
-		drone->axisRotations[0] = lerp(drone->axisRotations[0], 0, animSpeed);
+		(*drone->localTransform.rotation)[0] = lerp((*drone->localTransform.rotation)[0], 0, animSpeed);
 	}
 }
 
@@ -185,15 +185,15 @@ void applyKeys() {
 	currentSide = lerp(currentSide, sideSpeed, acceleration);
 
 	drone->UpdateLocalTransform(Transform{
-			new Translation{
+			new vec3{
 			// this is using radians, since later the rotate is also in radians
 			// need to think why it needs to be negative
-				currentSpeed * cos(-drone->axisRotations[1]) + currentSide * sin(drone->axisRotations[1]),
+				currentSpeed * cos(-(*drone->localTransform.rotation)[1]) + currentSide * sin((*drone->localTransform.rotation)[1]),
 				currentUp,
-				currentSpeed * sin(-drone->axisRotations[1]) + currentSide * cos(drone->axisRotations[1])
+				currentSpeed * sin(-(*drone->localTransform.rotation)[1]) + currentSide * cos((*drone->localTransform.rotation)[1])
 			},
 			nullptr,
-			new Rotation{ tempAngle, 0.0f, 1.0f, 0.0f }
+			new vec3{ 0.0f, tempAngle, 0.0f }
 		}
 	);
 }
@@ -482,6 +482,22 @@ void buildScene()
 		meshCreators[SPHERE](),
 		meshMaterials[NOT_DEFAULT]
 	);
+	createGeometry(
+		meshCreators[TORUS](),
+		meshMaterials[DEFAULT]
+	);
+	createGeometry(
+		meshCreators[CYLINDER](),
+		meshMaterials[DEFAULT]
+	);
+	createGeometry(
+		meshCreators[CONE](),
+		meshMaterials[NOT_DEFAULT]
+	);
+	createGeometry(
+		meshCreators[PAWN](),
+		meshMaterials[NOT_DEFAULT]
+	);
 
 	//floor
 	sg.AddNode(QUAD, 3, objectTransforms[FLOOR]);
@@ -498,23 +514,23 @@ void buildScene()
 	//drone
 	drone = sg.AddNode(CUBE, 4, objectTransforms[DRONEBODY]);
 	sg.AddNode(CUBE, 4, Transform{
-		new Translation{1.0f, 1.0f, 1.0f},
-		new Scale{0.2f, 0.2f, 0.2f},
+		new vec3{1.0f, 1.0f, 1.0f},
+		new vec3{0.2f, 0.2f, 0.2f},
 		nullptr
 	}, drone);
 	sg.AddNode(CUBE, 4, Transform{
-		new Translation{1.0f, 1.0f, -1.0f},
-		new Scale{0.2f, 0.2f, 0.2f},
+		new vec3{1.0f, 1.0f, -1.0f},
+		new vec3{0.2f, 0.2f, 0.2f},
 		nullptr
 	}, drone);
 	sg.AddNode(CUBE, 4, Transform{
-		new Translation{-1.0f, 1.0f, 1.0f},
-		new Scale{0.2f, 0.2f, 0.2f},
+		new vec3{-1.0f, 1.0f, 1.0f},
+		new vec3{0.2f, 0.2f, 0.2f},
 		nullptr
 	}, drone);
 	sg.AddNode(CUBE, 4, Transform{
-		new Translation{-1.0f, 1.0f, -1.0f},
-		new Scale{0.2f, 0.2f, 0.2f},
+		new vec3{-1.0f, 1.0f, -1.0f},
+		new vec3{0.2f, 0.2f, 0.2f},
 		nullptr
 	}, drone);
 
@@ -525,8 +541,8 @@ void buildScene()
 
 	//BigBall
 	sg.AddNode(SPHERE, 2, Transform{
-		new Translation{0.0f, 15.0f, 0.0f},
-		new	Scale{5.0f, 5.0f, 5.0f},
+		new vec3{0.0f, 15.0f, 0.0f},
+		new	vec3{5.0f, 5.0f, 5.0f},
 		nullptr
 		}
 	);

@@ -17,9 +17,9 @@ public:
 		float x = ((float)(rand()) / (float)(RAND_MAX)) * pow(-1, rand() % 100 + 1);
 		float y = ((float)(rand()) / (float)(RAND_MAX)) * pow(-1, rand() % 100 + 1);
 
-		axisRotations[1] = moveDirection;
+		(*localTransform.rotation)[1] = moveDirection;
 
-		this->localTransform.translation = new Translation{
+		this->localTransform.translation = new vec3{
 			(x * moveRadius * (float)cos(moveDirection * (PI / 180.0f))) + this->centre[0],
 			3.0f,
 			(y * moveRadius * (float)sin(moveDirection * (PI / 180.0f))) + this->centre[2]

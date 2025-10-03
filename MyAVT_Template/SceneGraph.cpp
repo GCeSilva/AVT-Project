@@ -76,9 +76,9 @@ void SceneGraph::DrawNode(Node* node) {
 
 	if (node->localTransform.rotation) {
 		//rotate assumes that the angle is in degrees
-		mu.rotate(gmu::MODEL, node->axisRotations[1] / (PI / 180.0f), 0.0f, 1.0f, 0.0f);
-		mu.rotate(gmu::MODEL, node->axisRotations[2] / (PI / 180.0f), 0.0f, 0.0f, 1.0f);
-		mu.rotate(gmu::MODEL, node->axisRotations[0] / (PI / 180.0f), 1.0f, 0.0f, 0.0f);
+		mu.rotate(gmu::MODEL, (*node->localTransform.rotation)[1] / (PI / 180.0f), 0.0f, 1.0f, 0.0f);
+		mu.rotate(gmu::MODEL, (*node->localTransform.rotation)[2] / (PI / 180.0f), 0.0f, 0.0f, 1.0f);
+		mu.rotate(gmu::MODEL, (*node->localTransform.rotation)[0] / (PI / 180.0f), 1.0f, 0.0f, 0.0f);
 	}
 
 	if (node->localTransform.scale)
@@ -143,22 +143,22 @@ std::unordered_map<MaterialConfigs, Material> meshMaterials = {
 std::unordered_map<Objects, Transform> objectTransforms = {
 	{ FLOOR, {
 		nullptr,
-		new Scale{ 1000.0f, 1000.0f, 0.0f },
-		new Rotation{ -90.0f, 1.0f, 0.0f, 0.0f }
+		new vec3 { 1000.0f, 1000.0f, 0.0f },
+		new vec3 { -90.0f, 1.0f, 0.0f }
 	}},
 	{ BUILDING, {
-		new Translation{0.0f, 0.5f, 0.0f},
-		new Scale{ 2.0f, 5.0f, 2.0f},
+		new vec3 { 0.0f, 0.5f, 0.0f },
+		new vec3 { 2.0f, 5.0f, 2.0f },
 		nullptr
 	}},
 	{ DRONEBODY, {
-		new Translation{ 0.0f, 3.0f, 0.0f},
-		new Scale{ 1.0f, 0.4f, 0.6f },
-		new Rotation {0.0f, 0.0f, 0.0f, 0.0f}
+		new vec3 { 0.0f, 3.0f, 0.0f },
+		new vec3 { 1.0f, 0.4f, 0.6f },
+		new vec3 { 0.0f, 0.0f, 0.0f }
 	}},
 	{ BIGBALL, {
-		new Translation{0.0f, 15.0f, 0.0f},
-		new	Scale{5.0f, 5.0f, 5.0f},
+		new vec3 { 0.0f, 15.0f, 0.0f },
+		new	vec3 { 5.0f, 5.0f, 5.0f },
 		nullptr
 	}}
 };
@@ -183,7 +183,7 @@ void CreateCity(SceneGraph* sg ,std::array<int, 2> domainX, std::array<int, 2> d
 					tmpNode = sg->AddNode(CUBE, 2, objectTransforms[BUILDING]);
 
 					tmpNode->UpdateLocalTransform(Transform{
-						new Translation{
+						new vec3{
 							//this one between blocks
 							((float)x * (distanceBlocks + (*objectTransforms[BUILDING].scale)[0] * blockSize + (blockSize - 1) * (*objectTransforms[BUILDING].scale)[0] * percentDistBuildings)) +
 							//this one between buildings

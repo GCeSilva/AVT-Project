@@ -179,6 +179,7 @@
     <None Include="shaders\ttf.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="LightNode.h" />
@@ -192,6 +193,7 @@
     <ClInclude Include="stb_rect_pack.h" />
     <ClInclude Include="stb_truetype.h" />
     <ClInclude Include="texture.h" />
+    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -7,13 +7,13 @@ bool ObstacleNode::ProcessNode() {
 
 	// if within bounds move
 	UpdateLocalTransform(Transform{
-			new Translation{
+			new vec3{
 				moveSpeed * (float)cos(- moveDirection),
 				0.0f,
 				moveSpeed * (float)sin(-moveDirection)
 			},
 			nullptr,
-			new Rotation{ 45.0f, 0.0f, 1.0f, 0.0f }
+			new vec3{ 0.0f, 45.0f, 0.0f }
 		}
 	);
 

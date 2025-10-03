@@ -39,9 +39,9 @@ void Camera::RenderFollow() {
 		parentPos[1] = (*parent->localTransform.translation)[1];
 		parentPos[2] = (*parent->localTransform.translation)[2];
 
-		parentRot[0] = parent->axisRotations[0];
-		parentRot[1] = parent->axisRotations[1];
-		parentRot[2] = parent->axisRotations[2];
+		parentRot[0] = (*parent->localTransform.rotation)[0];
+		parentRot[1] = (*parent->localTransform.rotation)[1];
+		parentRot[2] = (*parent->localTransform.rotation)[2];
 
 		tempParent = tempParent->GetParent();
 	}

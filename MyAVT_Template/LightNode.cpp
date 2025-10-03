@@ -50,9 +50,9 @@ void SpotLightNode::CalculateLight(int* shaderArrayIndex) {
 				tempSpotLight[1] += (*tempParent->localTransform.translation)[1];
 				tempSpotLight[2] += (*tempParent->localTransform.translation)[2];
 
-				tempAxisRot[0] = tempParent->axisRotations[0];
-				tempAxisRot[1] = tempParent->axisRotations[1];
-				tempAxisRot[2] = tempParent->axisRotations[2];
+				tempAxisRot[0] = (*tempParent->localTransform.rotation)[0];
+				tempAxisRot[1] = (*tempParent->localTransform.rotation)[1];
+				tempAxisRot[2] = (*tempParent->localTransform.rotation)[2];
 
 				tempParent = tempParent->GetParent();
 			}
