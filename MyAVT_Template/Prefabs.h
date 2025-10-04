@@ -4,6 +4,7 @@
 
 #include "Model.h"
 #include "Transform.h"
+#include "mathUtility.h"
 
 enum MaterialConfigs {
 	DEFAULT,

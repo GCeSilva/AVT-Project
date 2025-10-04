@@ -1,6 +1,5 @@
 #pragma once
 
-#include "mathUtility.h"
 #include "LightNode.h"
 #include "ObstacleNode.h"
 #include "Camera.h"
@@ -8,8 +7,6 @@
 
 #define NUM_POINT_LIGHTS 6
 #define NUM_SPOT_LIGHTS 2
-
-extern gmu mu;
 
 class SceneGraph {
 public:
@@ -34,6 +31,8 @@ public:
 	Camera* activeCamera = nullptr;
 
 	void InitializeSceneGraph();
+
+	std::list<Node*> GetGraph() { return head; }
 
 	void AddLight(LightNode* light);
 

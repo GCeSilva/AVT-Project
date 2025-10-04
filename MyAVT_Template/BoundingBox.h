@@ -1,26 +1,34 @@
 #pragma once
 #include "Transform.h"
+#include "Prefabs.h"
+
+//forward declaration
+class Node;
 
 class BoundingBox {
 public:
-	BoundingBox(float* vertex, int vertexCount, Transform parentTransform) {
-		//copy vertices
-		memcpy(vertices, vertex, sizeof(float) * vertexCount);
-		this->vertexCount = vertexCount;
+	BoundingBox(Node* parent) {
 
-		//apply parent transform to make sure vertices are correct
+		this->parent = parent;
 
+		initBounds();
 	}
 
 	void RecalculateBounds();
 
-	bool CheckCollision();
+	bool CheckCollision(BoundingBox* other);
+
+	const vec3 GetMaxBounds() { return minBounds; }
+	const vec3 GetMinBounds() { return maxBounds; }
 
 private:
+
+	void initBounds();
+	int calculateParentAccumulativeTransform(Node* parent);
+
 	vec3 minBounds = { 0.0f, 0.0f, 0.0f };
 	vec3 maxBounds = { 0.0f, 0.0f, 0.0f };
 
-	float* vertices;
-	int vertexCount;
+	Node* parent;
 
 };

@@ -250,4 +250,5 @@
 				std::vector<float*> mMatrixStack[COUNT_MATRICES];
 		};
 
+	gmu& getMu();
 #endif

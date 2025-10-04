@@ -30,6 +30,10 @@ DegToRad(float degrees)
 	return (float)(degrees * (M_PI / 180.0f));
 };
 
+gmu& getMu() {
+	static gmu muInstance;
+	return muInstance;
+}
 
 // glPushMatrix implementation
 void gmu::pushMatrix(MatrixTypes aType) {

@@ -28,6 +28,8 @@ public:
 
 	bool ProcessNode();
 
+	bool CollisionBehaviour(Node* other) override;
+
 private:
 	// this is a rotation angle, which tells forward direction, also in radians
 	float moveDirection = 0.0f;

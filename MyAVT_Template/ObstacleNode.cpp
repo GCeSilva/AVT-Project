@@ -1,4 +1,5 @@
 #include "ObstacleNode.h"
+#include "Prefabs.h"
 
 bool ObstacleNode::ProcessNode() {
 
@@ -25,4 +26,14 @@ bool ObstacleNode::CheckDistanceFromMoveArea() {
 		(*localTransform.translation)[0] * (*localTransform.translation)[0] +
 		(*localTransform.translation)[2] * (*localTransform.translation)[2]
 	) <= moveRadius;
+}
+
+bool ObstacleNode::CollisionBehaviour(Node* other){
+
+	other->localTransform.translation = new vec3{ 0.0f, 3.0f, 0.0f };
+
+	other->localTransform.rotation = new vec3{0.0f, 0.0f, 0.0f};
+
+	//so it doesnt roll back the movement before the teleport
+	return false;
 }

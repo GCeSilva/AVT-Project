@@ -30,6 +30,8 @@
 #include "texture.h"
 #include "SceneGraph.h"
 
+#define THRESHOLD 0.01f
+
 using namespace std;
 
 #define CAPTION "AVT 2025 Welcome Demo"
@@ -41,8 +43,6 @@ unsigned int FrameCount = 0;
 //File with the font
 const string fontPathFile = "fonts/arial.ttf";
 
-////Object of class gmu (Graphics Math Utility) to manage math and matrix operations
-gmu mu;
 
 //Object of class renderer to manage the rendering of meshes and ttf-based bitmap text
 Renderer renderer;
@@ -53,7 +53,6 @@ Node* drone;
 // Controls
 std::array<int, 8> speedKeys;
 // SPEED IS MEANT TO INCREMENT AND DECREMENT AS WE CLICK THE KEYS
-float currentSpeed = 0.0f;
 float maxSpeed = 0.5f;
 float acceleration = 0.1f;
 float rotationSpeed = 5.0f;
@@ -129,7 +128,7 @@ float tiltAngle = -(15.0f * (PI / 180.0f));
 // side to side anim vars
 float sideTiltAngle = -(10.0f * (PI / 180.0f));
 
-void animations() {
+bool animations() {
 	//put real time transforms here
 	for each(Node * child in drone->GetChildren())
 	{
@@ -140,31 +139,63 @@ void animations() {
 			});
 	}
 
+	float transformCheck = 0.0f;
+
 	if (speedKeys[0] != 0 || speedKeys[1] != 0) {
 		// never forgeti, this is in radians
-		(*drone->localTransform.rotation)[2] = lerp((*drone->localTransform.rotation)[2], (speedKeys[1] + speedKeys[0]) * tiltAngle, animSpeed);
+		transformCheck = lerp((*drone->localTransform.rotation)[2], (speedKeys[1] + speedKeys[0]) * tiltAngle, animSpeed);
+		transformCheck = abs(transformCheck) <= THRESHOLD ? 0.0f : transformCheck;
+		(*drone->localTransform.rotation)[2] = transformCheck;
 	}
 	else {
-		(*drone->localTransform.rotation)[2] = lerp((*drone->localTransform.rotation)[2], 0, animSpeed);
+		transformCheck = lerp((*drone->localTransform.rotation)[2], 0, animSpeed);
+		transformCheck = abs(transformCheck) <= THRESHOLD ? 0.0f : transformCheck;
+		(*drone->localTransform.rotation)[2] = transformCheck;
 	}
+
 	if (speedKeys[2] != 0 || speedKeys[3] != 0) {
-		(*drone->localTransform.rotation)[0] = lerp((*drone->localTransform.rotation)[0], (speedKeys[3] + speedKeys[2]) * sideTiltAngle, animSpeed);
+		transformCheck = lerp((*drone->localTransform.rotation)[0], (speedKeys[3] + speedKeys[2]) * sideTiltAngle, animSpeed);
+		transformCheck = abs(transformCheck) <= THRESHOLD ? 0.0f : transformCheck;
+		(*drone->localTransform.rotation)[0] = transformCheck;
 	}
 	else {
-		(*drone->localTransform.rotation)[0] = lerp((*drone->localTransform.rotation)[0], 0, animSpeed);
+		transformCheck = lerp((*drone->localTransform.rotation)[0], 0, animSpeed);
+		transformCheck = abs(transformCheck) <= THRESHOLD ? 0.0f : transformCheck;
+		(*drone->localTransform.rotation)[0] = transformCheck;
 	}
 
 	if (speedKeys[6] != 0 || speedKeys[7] != 0) {
-		(*drone->localTransform.rotation)[0] = lerp((*drone->localTransform.rotation)[0], -(speedKeys[6] + speedKeys[7]) * tiltAngle, animSpeed);
+		transformCheck = lerp((*drone->localTransform.rotation)[0], -(speedKeys[6] + speedKeys[7]) * tiltAngle, animSpeed);
+		transformCheck = abs(transformCheck) <= THRESHOLD ? 0.0f : transformCheck;
+		(*drone->localTransform.rotation)[0] = transformCheck;
 	}
 	else {
-		(*drone->localTransform.rotation)[0] = lerp((*drone->localTransform.rotation)[0], 0, animSpeed);
+		transformCheck = lerp((*drone->localTransform.rotation)[0], 0, animSpeed);
+		transformCheck = abs(transformCheck) <= THRESHOLD ? 0.0f : transformCheck;
+		(*drone->localTransform.rotation)[0] = transformCheck;
 	}
+
+	if (transformCheck != 0)
+		return true;
+
+	return false;
+}
+
+bool droneCollisionCheck() {
+	for each(Node* node in sg.GetGraph())
+	{
+		if (node == drone) continue;
+		if (drone->boundingBox->CheckCollision(node->boundingBox))
+			return node->CollisionBehaviour(drone);
+	}
+	return false;
 }
 
 float currentUp = 0.0f;
 float currentSide = 0.0f;
-void applyKeys() {
+float currentSpeed = 0.0f;
+
+void applyKeys(bool ani) {
 	// key input output
 	// WE NEED TO ADD TILT TO THE MOVEMENT AND ALSO MOVE THE LIGTHS ACCORDINGLY
 	float tempAngle = 0.0f;
@@ -178,12 +209,18 @@ void applyKeys() {
 
 	float sideSpeed = speedKeys[6] != 0 || speedKeys[7] != 0 ? maxSpeed * (speedKeys[6] + speedKeys[7]) : 0.0f;
 
+
+	//interpolation for smoother movement
 	currentSpeed = lerp(currentSpeed, targetSpeed, acceleration);
-
 	currentUp = lerp(currentUp, upSpeed, acceleration);
-
 	currentSide = lerp(currentSide, sideSpeed, acceleration);
 
+	// theres still these shenanigans :<
+	currentSpeed = abs(currentSpeed) <= THRESHOLD ? 0.0f : currentSpeed;
+	currentUp = abs(currentUp) <= THRESHOLD ? 0.0f : currentUp;
+	currentSide = abs(currentSide) <= THRESHOLD ? 0.0f : currentSide;
+
+	//bounds updated every frame now i guess
 	drone->UpdateLocalTransform(Transform{
 			new vec3{
 			// this is using radians, since later the rotate is also in radians
@@ -196,6 +233,25 @@ void applyKeys() {
 			new vec3{ 0.0f, tempAngle, 0.0f }
 		}
 	);
+	
+	if (droneCollisionCheck()) {
+		drone->UpdateLocalTransform(Transform{
+			new vec3{
+				// this is using radians, since later the rotate is also in radians
+				// need to think why it needs to be negative
+					-currentSpeed * cos(-(*drone->localTransform.rotation)[1]) + currentSide * sin((*drone->localTransform.rotation)[1]),
+					-currentUp,
+					-currentSpeed * sin(-(*drone->localTransform.rotation)[1]) + currentSide * cos((*drone->localTransform.rotation)[1])
+				},
+				nullptr,
+				new vec3{ 0.0f, -tempAngle, 0.0f }
+			}
+		);
+		currentSpeed = 0.0f;
+		currentSide = 0.0f;
+		currentUp = 0.0f;
+	}
+		
 }
 
 void obstacleBehaviour() {
@@ -232,9 +288,12 @@ void renderSim(void) {
 
 	obstacleBehaviour();
 
-	animations();
+	bool ani = animations();
+	
+	applyKeys(ani);
 
-	applyKeys();
+	//if (droneCollisionCheck())
+		//std::cout << "COLLISION DETECTER!" << std::endl;
 
 	sg.DrawScene();
 	
@@ -513,6 +572,7 @@ void buildScene()
 
 	//drone
 	drone = sg.AddNode(CUBE, 4, objectTransforms[DRONEBODY]);
+
 	sg.AddNode(CUBE, 4, Transform{
 		new vec3{1.0f, 1.0f, 1.0f},
 		new vec3{0.2f, 0.2f, 0.2f},
@@ -540,7 +600,7 @@ void buildScene()
 	}
 
 	//BigBall
-	sg.AddNode(SPHERE, 2, Transform{
+	sg.AddNode(PAWN, 2, Transform{
 		new vec3{0.0f, 15.0f, 0.0f},
 		new	vec3{5.0f, 5.0f, 5.0f},
 		nullptr

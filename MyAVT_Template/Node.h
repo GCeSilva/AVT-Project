@@ -1,13 +1,14 @@
 #pragma once
 #include <list>
 #include <array>
-#include "Transform.h"
+#include "BoundingBox.h"
 
 class Node {
 public:
 	int meshId;
 	int textureId;
 	Transform localTransform;
+	BoundingBox* boundingBox = nullptr;
 
 	Node(int meshId, int textureID, Transform localTransform, Node* parent = nullptr)
 	{
@@ -25,7 +26,10 @@ public:
 			(*localTransform.rotation)[2] = (*localTransform.rotation)[2] * (PI / 180.0f);
 		}
 
+		boundingBox = new BoundingBox{ this };
 	}
+
+	virtual bool CollisionBehaviour(Node* other) { return true; }
 
 	void AddChild(Node* child) { this->children.push_back(child); }
 	void RemoveNode(Node* node) { this->children.remove(node); }
@@ -37,6 +41,7 @@ public:
 	//could this allow negative axis values?
 	void UpdateLocalTransform(Transform additiveTransform) {
 		localTransform += additiveTransform;
+		boundingBox->RecalculateBounds();
 	}
 
 private:
