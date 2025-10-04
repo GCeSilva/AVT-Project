@@ -12,13 +12,13 @@ public:
 
 	}
 
-	void RecalculateBounds() {
+	void RecalculateBounds();
 
-	}
+	bool CheckCollision();
 
 private:
-	float minBounds[3] = { 0.0f, 0.0f, 0.0f };
-	float maxBounds[3] = { 0.0f, 0.0f, 0.0f };
+	vec3 minBounds = { 0.0f, 0.0f, 0.0f };
+	vec3 maxBounds = { 0.0f, 0.0f, 0.0f };
 
 	float* vertices;
 	int vertexCount;

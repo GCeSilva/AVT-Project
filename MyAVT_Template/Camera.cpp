@@ -103,7 +103,6 @@ void Camera::RenderTopDownOrtho() {
 	glViewport(0, 0, width, height);
 
 	// set the projection matrix
-	float ratio = (1.0f * width) / height;
 	mu.loadIdentity(gmu::PROJECTION);
 	mu.ortho(-width/12, width/12, -height/12, height/12, 0.1f, 1000.0f);
 

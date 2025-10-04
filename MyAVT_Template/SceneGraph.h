@@ -1,12 +1,10 @@
 #pragma once
-#include <unordered_map>
-#include <functional>
 
 #include "mathUtility.h"
-#include "model.h"
 #include "LightNode.h"
 #include "ObstacleNode.h"
 #include "Camera.h"
+#include "Prefabs.h"
 
 #define NUM_POINT_LIGHTS 6
 #define NUM_SPOT_LIGHTS 2
@@ -56,32 +54,7 @@ private:
 };
 
 // mesh creation
-enum Mesh {
-	QUAD,
-	CUBE,
-	SPHERE,
-	TORUS,
-	CYLINDER,
-	CONE,
-	PAWN
-};
-enum MaterialConfigs {
-	DEFAULT,
-	NOT_DEFAULT
-};
-
 void createGeometry(MyMesh amesh, Material mat);
-extern std::unordered_map<MaterialConfigs, Material> meshMaterials;
-extern std::unordered_map<Mesh, std::function<MyMesh()>> meshCreators;
-
-// list of pre set objects
-enum Objects {
-	FLOOR,
-	BUILDING,
-	DRONEBODY,
-	BIGBALL
-};
-extern std::unordered_map<Objects, Transform> objectTransforms;
 
 //helper funcitons, later put them in their own .h file
 void CreateCity(SceneGraph* sg, std::array<int, 2> domainX, std::array<int, 2> domainY, 

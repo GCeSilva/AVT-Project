@@ -165,6 +165,7 @@
     <ClCompile Include="LightNode.cpp" />
     <ClCompile Include="mathUtility.cpp" />
     <ClCompile Include="ObstacleNode.cpp" />
+    <ClCompile Include="Prefabs.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="shader.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="model.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="ObstacleNode.h" />
+    <ClInclude Include="Prefabs.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="shader.h" />

@@ -10,15 +10,15 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <vector>
+#include <iostream>
 
 // include GLEW to access OpenGL 3.3 functions
 #include <GL/glew.h>
 
 #include "mathUtility.h"
 #include "shader.h"
-#include "model.h"
 #include "cube.h"
-
+#include "Prefabs.h"
 
 GLuint VboId[2];
 
@@ -35,6 +35,11 @@ MyMesh createQuad(float size_x, float size_y) {
 		vert[i*4] *= size_x;
 		vert[i*4+1] *= size_y;
 	}
+
+	float* vertCopy = new float[16];
+	memcpy(vertCopy, vert, sizeof(vert));
+	objectVertices[QUAD] = vertCopy;
+	objectNumberVertices[QUAD] = 16;
 
 	glGenVertexArrays(1, &(amesh.vao));
 	glBindVertexArray(amesh.vao);
@@ -75,6 +80,11 @@ MyMesh createCube() {
 
 	glGenBuffers(2, VboId);
 	glBindBuffer(GL_ARRAY_BUFFER, VboId[0]);
+
+	float* verticeCopy = new float[96];
+	memcpy(verticeCopy, vertices, sizeof(vertices));
+	objectVertices[CUBE] = verticeCopy;
+	objectNumberVertices[CUBE] = 96;
 	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices)+sizeof(normals)+sizeof(texCoords)+sizeof(tangents), vertices, GL_STATIC_DRAW);
 		//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
@@ -106,7 +116,7 @@ MyMesh createCube() {
 MyMesh createSphere(float radius, int divisions) {
 
 	float *p = circularProfile(-3.14159f/2.0f, 3.14159f/2.0f, radius, divisions);
-	return(computeVAO(divisions+1, p+2, p, divisions*2, 0.0f));
+	return(computeVAO(divisions+1, p+2, p, divisions*2, 0.0f, SPHERE));
 }
 
 
@@ -114,7 +124,7 @@ MyMesh createTorus(float innerRadius, float outerRadius, int rings, int sides) {
 
 	float tubeRadius = (outerRadius - innerRadius) * 0.5f;
 	float *p = circularProfile(-3.14159f, 3.14159f, tubeRadius, sides, innerRadius + tubeRadius);
-	return(computeVAO(sides+1, p+2, p, rings, 0.0f));
+	return(computeVAO(sides+1, p+2, p, rings, 0.0f, TORUS));
 }
 
 
@@ -129,7 +139,7 @@ MyMesh createCylinder(float height, float radius, int sides) {
 			-radius,	 height*0.5f
 	};
 
-	return(computeVAO(4, p+2, p, sides, 0.0f));
+	return(computeVAO(4, p+2, p, sides, 0.0f, CYLINDER));
 }
 
 MyMesh createCone(float height, float baseRadius, int sides) {
@@ -167,60 +177,61 @@ MyMesh createCone(float height, float baseRadius, int sides) {
 	//		-baseRadius,	height*2.0f,
 	//	};
 
-	return(computeVAO((p.size()-4)/2, &(p[2]), &(p[0]), sides, 0.0f));
+	return(computeVAO((p.size()-4)/2, &(p[2]), &(p[0]), sides, 0.0f, CONE));
 }
 
 
 MyMesh createPawn() {
 
-		float p[] = {0.0f, 0.0f, 
-					  0.98f, 0.0f, 
-					  0.98f, 0.01f,
-					  0.99f, 0.02f,
-					  1.0f , 0.02f,
-					  1.0f , 0.3f,
-					  0.99f, 0.31f,
-					  0.98f, 0.32f,
-					  0.93f, 0.32f,
+		float p[] = {
+			0.0f, 0.0f, 
+			0.98f, 0.0f, 
+			0.98f, 0.01f,
+			0.99f, 0.02f,
+			1.0f , 0.02f,
+			1.0f , 0.3f,
+			0.99f, 0.31f,
+			0.98f, 0.32f,
+			0.93f, 0.32f,
 
-					  0.95f, 0.38f,
-					  0.965f, 0.44f,
-					  0.97f, 0.48f,
-					  0.965f, 0.52f,
-					  0.95f, 0.56f,
-					  0.89f, 0.62f,
-					  0.83f, 0.66f,
-					  0.75f, 0.70f,
-					  0.66f, 0.735f,
-					  0.65f, 0.74f,
+			0.95f, 0.38f,
+			0.965f, 0.44f,
+			0.97f, 0.48f,
+			0.965f, 0.52f,
+			0.95f, 0.56f,
+			0.89f, 0.62f,
+			0.83f, 0.66f,
+			0.75f, 0.70f,
+			0.66f, 0.735f,
+			0.65f, 0.74f,
 
 					  
-					  0.611f, 0.83f,
-					  0.5f,   0.83f,
+			0.611f, 0.83f,
+			0.5f,   0.83f,
 
-					  0.35f,  2.0f,
+			0.35f,  2.0f,
 
-					  0.58f,  2.075f,
-					  0.610f, 2.10f,
-					  0.6225f, 2.1125f,
-					  0.625f, 2.125f,
-					  0.6225f, 2.1375f,
-					  0.610f, 2.15f,
-					  0.58f,  2.175f,
+			0.58f,  2.075f,
+			0.610f, 2.10f,
+			0.6225f, 2.1125f,
+			0.625f, 2.125f,
+			0.6225f, 2.1375f,
+			0.610f, 2.15f,
+			0.58f,  2.175f,
 
-					  0.32f, 2.27f,
-					  0.46f, 2.38f,
-					  0.56f, 2.514f,
-					  0.628f, 2.67f,
-					  0.65f, 2.84f,
+			0.32f, 2.27f,
+			0.46f, 2.38f,
+			0.56f, 2.514f,
+			0.628f, 2.67f,
+			0.65f, 2.84f,
 
-					  0.628f, 3.01f,
-					  0.56f, 3.164f,
-					  0.46f, 3.3f,
-					  0.32f, 3.40f,
-					  0.168f, 3.467f,
-					  0.0f, 3.486f
-					 };
+			0.628f, 3.01f,
+			0.56f, 3.164f,
+			0.46f, 3.3f,
+			0.32f, 3.40f,
+			0.168f, 3.467f,
+			0.0f, 3.486f
+		};
 		int numP=40;
 		int sides=30;
 		int closed = 1;
@@ -258,10 +269,10 @@ MyMesh createPawn() {
 											(points[(numPoints-2)*2 + 1] - points[(numPoints-3)*2 + 1]);
 	}
 
-	return(computeVAO(numP, p, points, sides, smoothCos));
+	return(computeVAO(numP, p, points, sides, smoothCos, PAWN));
 }
 
-MyMesh computeVAO(int numP, float *p, float *points, int sides, float smoothCos) {
+MyMesh computeVAO(int numP, float *p, float *points, int sides, float smoothCos, Mesh mesh) {
 	// Compute and store vertices
 	
 	int numSides = sides;
@@ -333,6 +344,8 @@ MyMesh computeVAO(int numP, float *p, float *points, int sides, float smoothCos)
 				smoothness.push_back(0);
 		}
 	}
+	
+	objectNumberVertices[mesh] = k * (numSides + 1);
 
 	unsigned int *faceIndex = (unsigned int *)malloc(sizeof(unsigned int) * (numP-1) * (numSides+1 ) * 6);
 	unsigned int count = 0;
@@ -386,6 +399,8 @@ MyMesh computeVAO(int numP, float *p, float *points, int sides, float smoothCos)
 	//index buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[1]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * amesh.numIndexes, faceIndex , GL_STATIC_DRAW);
+
+	objectVertices[mesh] = vertex;
 
 // unbind the VAO
 	glBindVertexArray(0);
