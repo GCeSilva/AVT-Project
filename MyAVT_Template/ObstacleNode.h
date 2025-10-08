@@ -11,8 +11,8 @@ public:
 	{
 		this->centre = centre;
 		//random angle between 0 and 359
-		moveDirection = 360 * (((float)(rand()) / (float)(RAND_MAX)));
-		moveSpeed = moveSpeed * ((float)(rand()) / (float)(RAND_MAX)+0.1f);
+		moveDirection = 360 *  (((float)(rand()) / (float)(RAND_MAX)));
+		moveSpeed = moveSpeed * ((float)(rand()) / (float)(RAND_MAX) + 0.1f);
 
 		float x = ((float)(rand()) / (float)(RAND_MAX)) * pow(-1, rand() % 100 + 1);
 		float y = ((float)(rand()) / (float)(RAND_MAX)) * pow(-1, rand() % 100 + 1);
@@ -36,7 +36,7 @@ private:
 	// this will be our center of the area of movement
 	std::array<float, 3> centre = { 0.0f, 0.0f, 0.0f };
 	float moveRadius = 50.0f;
-	float moveSpeed = 0.7f;
+	float moveSpeed	 = 0.7f;
 	
 	bool CheckDistanceFromMoveArea();
 };

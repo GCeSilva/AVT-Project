@@ -2,13 +2,13 @@
 
 // later change these to their own .h file
 std::unordered_map<Mesh, std::function<MyMesh()>> meshCreators = {
-	{ QUAD, []() { return createQuad(1.0f, 1.0f); }},
-	{ CUBE,  []() { return createCube(); }},
-	{ SPHERE,  []() { return createSphere(1.0f, 16); }},
-	{ TORUS,  []() { return createTorus(0.5f, 1.0f, 32, 16); }},
-	{ CYLINDER,  []() { return createCylinder(1.0f, 0.5f, 32); }},
-	{ CONE,  []() { return createCone(1.0f, 0.5f, 32); }},
-	{ PAWN,  []() { return createPawn(); }},
+	{ QUAD,		[]() { return createQuad(1.0f, 1.0f);			}},
+	{ CUBE,		[]() { return createCube();						}},
+	{ SPHERE,	[]() { return createSphere(1.0f, 16);			}},
+	{ TORUS,	[]() { return createTorus(0.5f, 1.0f, 32, 16);	}},
+	{ CYLINDER, []() { return createCylinder(1.0f, 0.5f, 32);	}},
+	{ CONE,		[]() { return createCone(1.0f, 0.5f, 32);		}},
+	{ PAWN,		[]() { return createPawn();						}},
 };
 
 std::unordered_map<MaterialConfigs, Material> meshMaterials = {
@@ -20,7 +20,7 @@ std::unordered_map<MaterialConfigs, Material> meshMaterials = {
 		100.0f, // Shininess
 		0 // Texture Count
 	}},
-	{ NOT_DEFAULT, {
+	{ TRANSLUCENT, {
 		{ 0.3f, 0.0f, 0.0f, 0.5f }, // Ambient
 		{ 0.8f, 0.1f, 0.1f, 0.5f }, // Diffuse
 		{ 0.3f, 0.3f, 0.3f, 0.5f }, // Specular

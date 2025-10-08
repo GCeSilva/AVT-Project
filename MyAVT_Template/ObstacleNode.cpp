@@ -9,7 +9,7 @@ bool ObstacleNode::ProcessNode() {
 	// if within bounds move
 	UpdateLocalTransform(Transform{
 			new vec3{
-				moveSpeed * (float)cos(- moveDirection),
+				moveSpeed * (float)cos(-moveDirection),
 				0.0f,
 				moveSpeed * (float)sin(-moveDirection)
 			},

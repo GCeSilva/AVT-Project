@@ -85,13 +85,13 @@ bool Renderer::truetypeInit(const std::string& fontFile) {
         float unusedX, unusedY;
 
         stbtt_GetPackedQuad(
-            font.packedChars,               // Array of stbtt_packedchar
-            TEX_SIZE,                           // Width of the font atlas texture
-            TEX_SIZE,                           // Height of the font atlas texture
-            i,                            // Index of the glyph
-            &unusedX, &unusedY,         // current position of the glyph in screen pixel coordinates, (not required as we have a different coordinate system)
-            &font.alignedQuads[i],              // stbtt_alligned_quad struct. (this struct mainly consists of the texture coordinates)
-            0                        // Allign X and Y position to a integer (doesn't matter because we are not using 'unusedX' and 'unusedY')
+            font.packedChars,       // Array of stbtt_packedchar
+            TEX_SIZE,               // Width of the font atlas texture
+            TEX_SIZE,               // Height of the font atlas texture
+            i,                      // Index of the glyph
+            &unusedX, &unusedY,     // current position of the glyph in screen pixel coordinates, (not required as we have a different coordinate system)
+            &font.alignedQuads[i],  // stbtt_alligned_quad struct. (this struct mainly consists of the texture coordinates)
+            0                       // Allign X and Y position to a integer (doesn't matter because we are not using 'unusedX' and 'unusedY')
         );
     }
 
@@ -146,14 +146,14 @@ bool Renderer::setRenderMeshesShaderProg(const std::string& vertShaderPath, cons
     if (!shader.isProgramValid())
         printf("GLSL Model Program Not Valid!\n");
 
-    pvm_loc = glGetUniformLocation(program, "m_pvm");
-    vm_loc = glGetUniformLocation(program, "m_viewModel");
-    normal_loc = glGetUniformLocation(program, "m_normal");
-    texMode_loc = glGetUniformLocation(program, "texMode"); // different modes of texturing
+    pvm_loc     = glGetUniformLocation(program, "m_pvm");
+    vm_loc      = glGetUniformLocation(program, "m_viewModel");
+    normal_loc  = glGetUniformLocation(program, "m_normal");
+    texMode_loc = glGetUniformLocation(program, "texMode");     // different modes of texturing
 
     lpos_loc = glGetUniformLocation(program, "l_pos");
 
-    tex_loc[0] = glGetUniformLocation(program, "texmap");
+    tex_loc[0] = glGetUniformLocation(program, "texmap" );
     tex_loc[1] = glGetUniformLocation(program, "texmap1");
     tex_loc[2] = glGetUniformLocation(program, "texmap2");
     tex_loc[3] = glGetUniformLocation(program, "texmap3");
@@ -308,10 +308,13 @@ void Renderer::renderMesh(const dataMesh& data) {
     // send the material
     loc = glGetUniformLocation(program, "mat.ambient");
     glUniform4fv(loc, 1, myMeshes[data.meshID].mat.ambient);
+
     loc = glGetUniformLocation(program, "mat.diffuse");
     glUniform4fv(loc, 1, myMeshes[data.meshID].mat.diffuse);
+    
     loc = glGetUniformLocation(program, "mat.specular");
     glUniform4fv(loc, 1, myMeshes[data.meshID].mat.specular);
+    
     loc = glGetUniformLocation(program, "mat.shininess");
     glUniform1f(loc, myMeshes[data.meshID].mat.shininess);
 

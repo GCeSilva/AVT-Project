@@ -22,7 +22,7 @@ void PointLightNode::CalculateLight(int* shaderArrayIndex) {
 		tempPointLight[0] += position[0];
 		tempPointLight[1] += position[1];
 		tempPointLight[2] += position[2];
-		tempPointLight[3] = position[3];
+		tempPointLight[3]  = position[3];
 
 		renderer.SetPointLights(&tempPointLight, shaderArrayIndex);
 	}
@@ -61,7 +61,7 @@ void SpotLightNode::CalculateLight(int* shaderArrayIndex) {
 			tempSpotLight[0] += position[0];
 			tempSpotLight[1] += position[1];
 			tempSpotLight[2] += position[2];
-			tempSpotLight[3] = position[3];
+			tempSpotLight[3]  = position[3];
 
 			// later turn this into proper spherical coordinates
 			// also these need to be in degrees, hence the division by (PI/180)
@@ -73,7 +73,7 @@ void SpotLightNode::CalculateLight(int* shaderArrayIndex) {
 			//y
 			// adding this one was fairly simple, just wonder if we might have issues later on
 			// since this is not a full spherical coordinate system
-			tempConeDir[1] = coneDirection[1] + sin(tempAxisRot[2]) / (PI / 180.0f);
+			tempConeDir[1] = coneDirection[1] + sin( tempAxisRot[2]) / (PI / 180.0f);
 			//z
 			tempConeDir[2] = coneDirection[2] + sin(-tempAxisRot[1]) / (PI / 180.0f);
 			//not used

@@ -40,10 +40,10 @@ float normals[] = {   //cube normals
 	0.0f, 0.0f, 1.0f, 0.0f,
 	0.0f, 0.0f, 1.0f, 0.0f,
 
-	0.0f, 0.0f, -1.0f, 0.0f,
-	0.0f, 0.0f, -1.0f, 0.0f,
-	0.0f, 0.0f, -1.0f, 0.0f,
-	0.0f, 0.0f, -1.0f, 0.0f,
+	0.0f, 0.0f,-1.0f, 0.0f,
+	0.0f, 0.0f,-1.0f, 0.0f,
+	0.0f, 0.0f,-1.0f, 0.0f,
+	0.0f, 0.0f,-1.0f, 0.0f,
 
 	1.0f, 0.0f, 0.0f, 0.0f,
 	1.0f, 0.0f, 0.0f, 0.0f,
@@ -55,15 +55,15 @@ float normals[] = {   //cube normals
 	0.0f, 1.0f, 0.0f, 0.0f,
 	0.0f, 1.0f, 0.0f, 0.0f,
 
-	-1.0f, 0.0f, 0.0f, 0.0f,
-	-1.0f, 0.0f, 0.0f, 0.0f,
-	-1.0f, 0.0f, 0.0f, 0.0f,
-	-1.0f, 0.0f, 0.0f, 0.0f,
+   -1.0f, 0.0f, 0.0f, 0.0f,
+   -1.0f, 0.0f, 0.0f, 0.0f,
+   -1.0f, 0.0f, 0.0f, 0.0f,
+   -1.0f, 0.0f, 0.0f, 0.0f,
 
-	0.0f, -1.0f, 0.0f, 0.0f,
-	0.0f, -1.0f, 0.0f, 0.0f,
-	0.0f, -1.0f, 0.0f, 0.0f,
-	0.0f, -1.0f, 0.0f, 0.0f
+	0.0f,-1.0f, 0.0f, 0.0f,
+	0.0f,-1.0f, 0.0f, 0.0f,
+	0.0f,-1.0f, 0.0f, 0.0f,
+	0.0f,-1.0f, 0.0f, 0.0f
 };
 
 float texCoords[] = {
@@ -104,15 +104,15 @@ float tangents[] = {   //cube tangents
 	1.0f, 0.0f, 0.0f, 0.0f,
 	1.0f, 0.0f, 0.0f, 0.0f,
 
-	-1.0f, 0.0f, 0.0f, 0.0f,
-	-1.0f, 0.0f, 0.0f, 0.0f,
-	-1.0f, 0.0f, 0.0f, 0.0f,
-	-1.0f, 0.0f, 0.0f, 0.0f,
+   -1.0f, 0.0f, 0.0f, 0.0f,
+   -1.0f, 0.0f, 0.0f, 0.0f,
+   -1.0f, 0.0f, 0.0f, 0.0f,
+   -1.0f, 0.0f, 0.0f, 0.0f,
 
-	0.0f, 0.0f, -1.0f, 0.0f,
-	0.0f, 0.0f, -1.0f, 0.0f,
-	0.0f, 0.0f, -1.0f, 0.0f,
-	0.0f, 0.0f, -1.0f, 0.0f,
+	0.0f, 0.0f,-1.0f, 0.0f,
+	0.0f, 0.0f,-1.0f, 0.0f,
+	0.0f, 0.0f,-1.0f, 0.0f,
+	0.0f, 0.0f,-1.0f, 0.0f,
 
 	1.0f, 0.0f, 0.0f, 0.0f,
 	1.0f, 0.0f, 0.0f, 0.0f,
@@ -130,27 +130,27 @@ float tangents[] = {   //cube tangents
 	1.0f, 0.0f, 0.0f, 0.0f
 };
 
-float quad_vertices[] = {   //Quad 
-	-0.5f, -0.5f, 0.0f, 1.0f,  //BL
+float quad_vertices[] = {	//Quad 
+	-0.5f, -0.5f, 0.0f, 1.0f,	//BL
 	 0.5f, -0.5f, 0.0f, 1.0f,	//BR
 	 0.5f,  0.5f, 0.0f, 1.0f,	//TR
 	-0.5f,  0.5f, 0.0f, 1.0f,	//TL
 };
     
-float quad_vertices_0[] = {   //Quad 
-	-3.0f, -3.0f, 0.0f, 1.0f,  //BL
+float quad_vertices_0[] = {	//Quad 
+	-3.0f, -3.0f, 0.0f, 1.0f,	//BL
 	 3.0f, -3.0f, 0.0f, 1.0f,	//BR
 	 3.0f,  3.0f, 0.0f, 1.0f,	//TR
 	-3.0f,  3.0f, 0.0f, 1.0f,	//TL
 };
-float quad_normals[] = {   //Quad normals
+float quad_normals[] = {	//Quad normals
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f
 };
 
-float quad_texCoords[] = {   // quad texture coordinates
+float quad_texCoords[] = {	//Quad texture coordinates
 	0.0f, 0.0f, 0.0f, 1.0f,
 	64.0f, 0.0f, 0.0f, 1.0f,
 	64.0f, 64.0f, 0.0f, 1.0f,

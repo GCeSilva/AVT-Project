@@ -85,14 +85,14 @@ float pointLightPos[NUM_POINT_LIGHTS][4] = {
 	{ -5.0f,  10.0f,   5.0f, 1.0f },
 	{  5.0f,  10.0f,  -5.0f, 1.0f },
 	{ -5.0f,  10.0f,  -5.0f, 1.0f },
-	{   0.0f,  10.0f,    0.0f, 1.0f },
-	{  5.0f,  10.0f,    0.0f, 1.0f }
+	{  0.0f,  10.0f,   0.0f, 1.0f },
+	{  5.0f,  10.0f,   0.0f, 1.0f }
 };
 bool pointLightMode = true;
 
 //Spotlight
 float spotLightPos[NUM_SPOT_LIGHTS][4] = {
-	{ 1.0f, 0.0f, 0.0f, 1.0f },
+	{  1.0f, 0.0f, 0.0f, 1.0f },
 	{ -1.0f, 0.0f, 0.0f, 1.0f }
 };
 float coneDir[NUM_SPOT_LIGHTS][4] = { 
@@ -352,13 +352,13 @@ void SpecialInput(int key, int x, int y) {
 
 void processKeys(unsigned char key, int xx, int yy)
 {
-	if(key == 27) glutLeaveMainLoop();
+	if (key == 27) glutLeaveMainLoop();
 
-	if(key == 'c') sg.pointLightMode = !sg.pointLightMode;
+	if (key == 'c') sg.pointLightMode = !sg.pointLightMode;
 
-	if(key == 'n') sg.directionalLightMode = !sg.directionalLightMode;
+	if (key == 'n') sg.directionalLightMode = !sg.directionalLightMode;
 
-	if(key == 'h') sg.spotLightMode = !sg.spotLightMode;
+	if (key == 'h') sg.spotLightMode = !sg.spotLightMode;
 
 	if (key == 'f') sg.fogMode = !sg.fogMode;
 
@@ -380,9 +380,9 @@ void processKeys(unsigned char key, int xx, int yy)
 
 	if (key == '3') camera->currentState = Camera::TopDownOrtho;
 
-	if(key == 'm') glEnable(GL_MULTISAMPLE);
+	if (key == 'm') glEnable(GL_MULTISAMPLE);
 
-	if(key == 'b') glDisable(GL_MULTISAMPLE);
+	if (key == 'b') glDisable(GL_MULTISAMPLE);
 
 	if (key == 'r') { //reset
 		alpha = 57.0f; beta = 18.0f;  // Camera Spherical Coordinates
@@ -539,7 +539,7 @@ void buildScene()
 	);
 	createGeometry(
 		meshCreators[SPHERE](),
-		meshMaterials[NOT_DEFAULT]
+		meshMaterials[TRANSLUCENT]
 	);
 	createGeometry(
 		meshCreators[TORUS](),
@@ -551,18 +551,18 @@ void buildScene()
 	);
 	createGeometry(
 		meshCreators[CONE](),
-		meshMaterials[NOT_DEFAULT]
+		meshMaterials[TRANSLUCENT]
 	);
 	createGeometry(
 		meshCreators[PAWN](),
-		meshMaterials[NOT_DEFAULT]
+		meshMaterials[TRANSLUCENT]
 	);
 
 	//floor
 	sg.AddNode(QUAD, 3, objectTransforms[FLOOR]);
 
 	// buildings
-	std::array<int, 2> domainX = {-2, 2};
+	std::array<int, 2> domainX = { -2, 2 };
 	std::array<int, 2> domainY = { -2, 2 };
 	float pdb = 0.5f; //50% of the building size
 	float dbb = 5.0f;
@@ -574,23 +574,23 @@ void buildScene()
 	drone = sg.AddNode(CUBE, 4, objectTransforms[DRONEBODY]);
 
 	sg.AddNode(CUBE, 4, Transform{
-		new vec3{1.0f, 1.0f, 1.0f},
-		new vec3{0.2f, 0.2f, 0.2f},
+		new vec3{ 1.0f, 1.0f,  1.0f},
+		new vec3{ 0.2f, 0.2f,  0.2f},
 		nullptr
 	}, drone);
 	sg.AddNode(CUBE, 4, Transform{
-		new vec3{1.0f, 1.0f, -1.0f},
-		new vec3{0.2f, 0.2f, 0.2f},
+		new vec3{ 1.0f, 1.0f, -1.0f},
+		new vec3{ 0.2f, 0.2f,  0.2f},
 		nullptr
 	}, drone);
 	sg.AddNode(CUBE, 4, Transform{
-		new vec3{-1.0f, 1.0f, 1.0f},
-		new vec3{0.2f, 0.2f, 0.2f},
+		new vec3{-1.0f, 1.0f,  1.0f},
+		new vec3{ 0.2f, 0.2f,  0.2f},
 		nullptr
 	}, drone);
 	sg.AddNode(CUBE, 4, Transform{
 		new vec3{-1.0f, 1.0f, -1.0f},
-		new vec3{0.2f, 0.2f, 0.2f},
+		new vec3{ 0.2f, 0.2f,  0.2f},
 		nullptr
 	}, drone);
 
@@ -602,7 +602,7 @@ void buildScene()
 	//BigBall
 	sg.AddNode(PAWN, 2, Transform{
 		new vec3{0.0f, 15.0f, 0.0f},
-		new	vec3{5.0f, 5.0f, 5.0f},
+		new	vec3{5.0f, 5.0f , 5.0f},
 		nullptr
 		}
 	);
@@ -699,7 +699,7 @@ int main(int argc, char **argv) {
 
 	glutMouseFunc(processMouseButtons);
 	glutMotionFunc(processMouseMotion);
-	glutMouseWheelFunc ( mouseWheel ) ;
+	glutMouseWheelFunc(mouseWheel) ;
 	
 
 //	return from main loop
@@ -717,10 +717,10 @@ int main(int argc, char **argv) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(0.5, 0.6, 0.7, 1.0f);
 
-	printf ("Vendor: %s\n", glGetString (GL_VENDOR));
+	printf ("Vendor: %s\n"	, glGetString (GL_VENDOR));
 	printf ("Renderer: %s\n", glGetString (GL_RENDERER));
-	printf ("Version: %s\n", glGetString (GL_VERSION));
-	printf ("GLSL: %s\n", glGetString (GL_SHADING_LANGUAGE_VERSION));
+	printf ("Version: %s\n"	, glGetString (GL_VERSION));
+	printf ("GLSL: %s\n"	, glGetString (GL_SHADING_LANGUAGE_VERSION));
 
 	/* Initialization of DevIL */
 	if (ilGetInteger(IL_VERSION_NUM) < IL_VERSION)
@@ -734,7 +734,7 @@ int main(int argc, char **argv) {
 	buildScene();
 
 	if(!renderer.setRenderMeshesShaderProg("shaders/mesh_phong.vert", "shaders/mesh_phong.frag") || 
-		!renderer.setRenderTextShaderProg("shaders/ttf.vert", "shaders/ttf.frag"))
+		 !renderer.setRenderTextShaderProg("shaders/ttf.vert", "shaders/ttf.frag"))
 	return(1);
 
 	//  GLUT main loop

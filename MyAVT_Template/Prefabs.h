@@ -8,7 +8,7 @@
 
 enum MaterialConfigs {
 	DEFAULT,
-	NOT_DEFAULT
+	TRANSLUCENT
 };
 
 // list of pre set objects

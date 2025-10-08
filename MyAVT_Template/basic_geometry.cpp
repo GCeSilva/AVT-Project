@@ -280,9 +280,9 @@ MyMesh computeVAO(int numP, float *p, float *points, int sides, float smoothCos,
 
 	int numVertices = numP * 2 * (numSides + 1);
 
-	float *vertex = (float *)malloc(sizeof(float) * 4 * numVertices);
-	float *normal = (float *)malloc(sizeof(float) * 4 * numVertices);
-	float *textco = (float *)malloc(sizeof(float) * 4 * numVertices);
+	float *vertex  = (float *)malloc(sizeof(float) * 4 * numVertices);
+	float *normal  = (float *)malloc(sizeof(float) * 4 * numVertices);
+	float *textco  = (float *)malloc(sizeof(float) * 4 * numVertices);
 	float *tangent = (float *)malloc(sizeof(float) * 4 * numVertices);
 
 	float inc = 2 * 3.14159f / (numSides);
