@@ -15,7 +15,7 @@ public:
 	float lookTarget[3] = { 0.0f, 0.0f, 0.0f };
 	float height = 0.0f, width = 0.0f;
 
-	float radious = 45.0f;
+	float radious = 7.0f;
 	float localRotation[3] = { 18.0f, 0.0f, -90.0f };
 
 	CameraState currentState = FollowPlayerPersp;

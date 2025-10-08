@@ -76,6 +76,7 @@ void SceneGraph::DrawNode(Node* node) {
 
 	if (node->localTransform.rotation) {
 		//rotate assumes that the angle is in degrees
+		//this needs refactoring, it ruins quad normals
 		mu.rotate(gmu::MODEL, (*node->localTransform.rotation)[1] / (PI / 180.0f), 0.0f, 1.0f, 0.0f);
 		mu.rotate(gmu::MODEL, (*node->localTransform.rotation)[2] / (PI / 180.0f), 0.0f, 0.0f, 1.0f);
 		mu.rotate(gmu::MODEL, (*node->localTransform.rotation)[0] / (PI / 180.0f), 1.0f, 0.0f, 0.0f);

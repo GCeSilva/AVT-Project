@@ -36,10 +36,10 @@ MyMesh createQuad(float size_x, float size_y) {
 		vert[i*4+1] *= size_y;
 	}
 
-	float* vertCopy = new float[16];
+	/*float* vertCopy = new float[16];
 	memcpy(vertCopy, vert, sizeof(vert));
 	objectVertices[QUAD] = vertCopy;
-	objectNumberVertices[QUAD] = 16;
+	objectNumberVertices[QUAD] = 16;*/
 
 	glGenVertexArrays(1, &(amesh.vao));
 	glBindVertexArray(amesh.vao);
@@ -81,10 +81,10 @@ MyMesh createCube() {
 	glGenBuffers(2, VboId);
 	glBindBuffer(GL_ARRAY_BUFFER, VboId[0]);
 
-	float* verticeCopy = new float[96];
-	memcpy(verticeCopy, vertices, sizeof(vertices));
-	objectVertices[CUBE] = verticeCopy;
-	objectNumberVertices[CUBE] = 96;
+	//float* verticeCopy = new float[96];
+	//memcpy(verticeCopy, vertices, sizeof(vertices));
+	//objectVertices[CUBE] = verticeCopy;
+	//objectNumberVertices[CUBE] = 96;
 	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices)+sizeof(normals)+sizeof(texCoords)+sizeof(tangents), vertices, GL_STATIC_DRAW);
 		//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
@@ -345,7 +345,7 @@ MyMesh computeVAO(int numP, float *p, float *points, int sides, float smoothCos,
 		}
 	}
 	
-	objectNumberVertices[mesh] = k * (numSides + 1);
+	//objectNumberVertices[mesh] = numVertices;
 
 	unsigned int *faceIndex = (unsigned int *)malloc(sizeof(unsigned int) * (numP-1) * (numSides+1 ) * 6);
 	unsigned int count = 0;
@@ -400,7 +400,7 @@ MyMesh computeVAO(int numP, float *p, float *points, int sides, float smoothCos,
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[1]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * amesh.numIndexes, faceIndex , GL_STATIC_DRAW);
 
-	objectVertices[mesh] = vertex;
+	//objectVertices[mesh] = vertex;
 
 // unbind the VAO
 	glBindVertexArray(0);

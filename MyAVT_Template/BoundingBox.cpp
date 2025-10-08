@@ -9,14 +9,6 @@ gmu mu = getMu();
 // must be done after initializing so that the stack is in identity
 void BoundingBox::RecalculateBounds() {
 	// remember the vertex are a VEC4!!
-	
-	//calculate parent transform matrix
-
-	//1st calculate points with applyed transforms -> mu as method to mult matrix by point
-
-	//2nd check each point to see if its bigger or lesser then our current bounds
-
-	//both of these can be done in the same loop
 
 	int parentCount = calculateParentAccumulativeTransform(parent);
 
@@ -42,40 +34,23 @@ void BoundingBox::RecalculateBounds() {
 			objectVertices[(Mesh)parent->meshId][i + 2], 
 			1.0f 
 		};
-		resVertex[4];
+		float resVertex[4];
 		mu.multMatrixPoint(gmu::MODEL, vertex, resVertex);
 
-		//x
-		if (maxBounds[0] < resVertex[0])
-			maxBounds[0] = resVertex[0];
-		else if (minBounds[0] > resVertex[0])
-			minBounds[0] = resVertex[0];
-		//y
-		if (maxBounds[1] < resVertex[1])
-			maxBounds[1] = resVertex[1];
-		else if (minBounds[1] > resVertex[1])
-			minBounds[1] = resVertex[1];
-		//z
-		if (maxBounds[2] < resVertex[2])
-			maxBounds[2] = resVertex[2];
-		else if (minBounds[2] > resVertex[2])
-			minBounds[2] = resVertex[2];
+		for (int j = 0; j < 3; ++j) {
+			maxBounds[j] = std::max(maxBounds[j], resVertex[j]);
+			minBounds[j] = std::min(minBounds[j], resVertex[j]);
+		}
 	
 	}
 	//clear stack
 	for(int i = 0; i < parentCount; i++)
-		mu.popMatrix(gmu::MODEL);
-
-	/*std::cout << "maxBounds: \n\tx: " << maxBounds[0] << "\n\ty: " << maxBounds[1] << "\n\tz: " << maxBounds[2] << std::endl;
+		mu.popMatrix(gmu::MODEL);/*
+	std::cout << "Mesh Objects: " << parent->meshId << std::endl;
+	std::cout << "maxBounds: \n\tx: " << maxBounds[0] << "\n\ty: " << maxBounds[1] << "\n\tz: " << maxBounds[2] << std::endl;
 	std::cout << "minBounds: \n\tx: " << minBounds[0] << "\n\ty: " << minBounds[1] << "\n\tz: " << minBounds[2] << std::endl;
 	std::cout << "######" << std::endl;*/
 
-}
-
-// ;-;
-void BoundingBox::initBounds() {
-	mu.loadIdentity(gmu::MODEL);
-	RecalculateBounds();
 }
 // ahah sadge
 int BoundingBox::calculateParentAccumulativeTransform(Node* parent) {
@@ -103,6 +78,12 @@ int BoundingBox::calculateParentAccumulativeTransform(Node* parent) {
 	return i;
 }
 
+// ;-;
+void BoundingBox::initBounds() {
+	mu.loadIdentity(gmu::MODEL);
+	RecalculateBounds();
+}
+
 bool BoundingBox::CheckCollision(BoundingBox* other) {
 
 
@@ -115,15 +96,6 @@ bool BoundingBox::CheckCollision(BoundingBox* other) {
 	bool xT = ((minBounds[0] <= other->minBounds[0] && other->minBounds[0] <= maxBounds[0]) || (minBounds[0] <= other->maxBounds[0] && other->maxBounds[0] <= maxBounds[0]));
 	bool yT = ((minBounds[1] <= other->minBounds[1] && other->minBounds[1] <= maxBounds[1]) || (minBounds[1] <= other->maxBounds[1] && other->maxBounds[1] <= maxBounds[1]));
 	bool zT = ((minBounds[2] <= other->minBounds[2] && other->minBounds[2] <= maxBounds[2]) || (minBounds[2] <= other->maxBounds[2] && other->maxBounds[2] <= maxBounds[2]));
-
-	/*std::cout << minBounds[0] << " <= " << other->minBounds[0] << " <= " << maxBounds[0] << " = " << (minBounds[0] <= other->minBounds[0] && other->minBounds[0] <= maxBounds[0]) << std::endl;
-	std::cout << minBounds[0] << " <= " << other->minBounds[0] << " = " << (minBounds[0] <= other->minBounds[0]) << std::endl;
-	std::cout << other->minBounds[0] << " <= " << maxBounds[0] << " = " << (other->minBounds[0] <= maxBounds[0]) << std::endl;*/
-
-	//std::cout << (xT || xW) << " " << (yT || yW) << " " << (zT || zW) << " " << std::endl;
-
-	//std::cout << ((xT || xW) && (yT || yW) && (zT || zW)) << std::endl;
-
 
 	return	(xT || xW) && (yT || yW) && (zT || zW);
 }

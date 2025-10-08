@@ -28,5 +28,5 @@ extern std::unordered_map<MaterialConfigs, Material> meshMaterials;
 extern std::unordered_map<Objects, Transform> objectTransforms;
 
 // for bounding boxes
-extern std::unordered_map<Mesh, float*> objectVertices;
+extern std::unordered_map<Mesh, std::vector<float>> objectVertices;
 extern std::unordered_map<Mesh, int> objectNumberVertices;

@@ -4,7 +4,7 @@
 std::unordered_map<Mesh, std::function<MyMesh()>> meshCreators = {
 	{ QUAD,		[]() { return createQuad(1.0f, 1.0f);			}},
 	{ CUBE,		[]() { return createCube();						}},
-	{ SPHERE,	[]() { return createSphere(1.0f, 16);			}},
+	{ SPHERE,	[]() { return createSphere(0.5f, 16);			}},
 	{ TORUS,	[]() { return createTorus(0.5f, 1.0f, 32, 16);	}},
 	{ CYLINDER, []() { return createCylinder(1.0f, 0.5f, 32);	}},
 	{ CONE,		[]() { return createCone(1.0f, 0.5f, 32);		}},
@@ -33,9 +33,9 @@ std::unordered_map<MaterialConfigs, Material> meshMaterials = {
 // pre set objects
 std::unordered_map<Objects, Transform> objectTransforms = {
 	{ FLOOR, {
-		nullptr,
-		new vec3 { 1000.0f, 1000.0f, 0.0f },
-		new vec3 { -90.0f, 1.0f, 0.0f }
+		new vec3 { 0.0f ,0.0f ,0.0f },
+		new vec3 { 1000.0f, 1000.0f, 1.0f },
+		new vec3 { -90.0f, 0.0f, 0.0f }
 	}},
 	{ BUILDING, {
 		new vec3 { 0.0f, 0.5f, 0.0f },
@@ -54,5 +54,86 @@ std::unordered_map<Objects, Transform> objectTransforms = {
 	}}
 };
 
-std::unordered_map<Mesh, float*> objectVertices;
-std::unordered_map<Mesh, int> objectNumberVertices;
+std::unordered_map<Mesh, std::vector<float>> objectVertices = {
+	{ QUAD, {   //Quad 
+	-0.5f, -0.5f, 0.0f, 1.0f,  //BL
+	 0.5f, -0.5f, 0.0f, 1.0f,	//BR
+	 0.5f,  0.5f, 0.0f, 1.0f,	//TR
+	-0.5f,  0.5f, 0.0f, 1.0f,	//TL
+	}},
+	{ CUBE, {	//Cube
+	-0.5f, -0.5f, -0.5f,  1.0f,
+	-0.5f, -0.5f,  0.5f,  1.0f,
+	-0.5f,  0.5f,  0.5f,  1.0f,
+	-0.5f,  0.5f, -0.5f,  1.0f,
+
+	0.5f,  0.5f,  0.5f,  1.0f,
+	0.5f,  0.5f, -0.5f,  1.0f,
+	0.5f, -0.5f, -0.5f,  1.0f,
+	0.5f, -0.5f,  0.5f,  1.0f,
+	}},
+	{ SPHERE, {
+	  0.5f,  -0.5f,   0.5f,  1.0f,
+	 -0.5f,  -0.5f,   0.5f,  1.0f,
+	 -0.5f,  -0.5f,  -0.5f,  1.0f,
+	  0.5f,  -0.5f,  -0.5f,  1.0f,
+
+	  0.5f,  0.5f,   0.5f,  1.0f,
+	 -0.5f,  0.5f,   0.5f,  1.0f,
+	 -0.5f,  0.5f,  -0.5f,  1.0f,
+	  0.5f,  0.5f,  -0.5f,  1.0f,
+	}},
+	{ TORUS, {
+	  1.0f,  -0.25f,   1.0f,  1.0f,
+	 -1.0f,  -0.25f,   1.0f,  1.0f,
+	 -1.0f,  -0.25f,  -1.0f,  1.0f,
+	  1.0f,  -0.25f,  -1.0f,  1.0f,
+
+	  1.0f,  0.25f,   1.0f,  1.0f,
+	 -1.0f,  0.25f,   1.0f,  1.0f,
+	 -1.0f,  0.25f,  -1.0f,  1.0f,
+	  1.0f,  0.25f,  -1.0f,  1.0f,
+	}},
+	{ CYLINDER, {
+	  0.5f,  -0.5f,   0.5f,  1.0f,
+	 -0.5f,  -0.5f,   0.5f,  1.0f,
+	 -0.5f,  -0.5f,  -0.5f,  1.0f,
+	  0.5f,  -0.5f,  -0.5f,  1.0f,
+
+	  0.5f,   0.5f,   0.5f,  1.0f,
+	 -0.5f,   0.5f,   0.5f,  1.0f,
+	 -0.5f,   0.5f,  -0.5f,  1.0f,
+	  0.5f,   0.5f,  -0.5f,  1.0f,
+	}},
+	{ CONE, {
+	  0.5f,  0.0f,   0.5f,  1.0f,
+	 -0.5f,  0.0f,   0.5f,  1.0f,
+	 -0.5f,  0.0f,  -0.5f,  1.0f,
+	  0.5f,  0.0f,  -0.5f,  1.0f,
+
+	  0.5f,  1.0f,   0.5f,  1.0f,
+	 -0.5f,  1.0f,   0.5f,  1.0f,
+	 -0.5f,  1.0f,  -0.5f,  1.0f,
+	  0.5f,  1.0f,  -0.5f,  1.0f,
+	}},
+	{ PAWN, {
+	  1.0f,  0.0f,   1.0f,  1.0f,
+	 -1.0f,  0.0f,   1.0f,  1.0f,
+	 -1.0f,  0.0f,  -1.0f,  1.0f,
+	  1.0f,  0.0f,  -1.0f,  1.0f,
+
+	  1.0f,  3.5f,   1.0f,  1.0f,
+	 -1.0f,  3.5f,   1.0f,  1.0f,
+	 -1.0f,  3.5f,  -1.0f,  1.0f,
+	  1.0f,  3.5f,  -1.0f,  1.0f,
+	}},
+};
+std::unordered_map<Mesh, int> objectNumberVertices = {
+	{QUAD, 4*4},
+	{CUBE, 4*8},
+	{SPHERE, 4*8},
+	{TORUS, 4*8},
+	{CYLINDER, 4*8},
+	{CONE, 4*8},
+	{PAWN, 4 * 8},
+};

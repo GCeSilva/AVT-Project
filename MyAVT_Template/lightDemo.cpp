@@ -66,7 +66,7 @@ Camera* camera;
 
 // Camera Spherical Coordinates
 float alpha = 57.0f, beta = 18.0f;
-float r = 45.0f;
+float r = 5.0f;
 
 // Mouse Tracking Variables
 int startX, startY, tracking = 0;
@@ -285,47 +285,44 @@ void renderSim(void) {
 
 	// load identity matrices
 	sg.InitializeSceneGraph();
-
+	
 	obstacleBehaviour();
 
 	bool ani = animations();
 	
 	applyKeys(ani);
-
-	//if (droneCollisionCheck())
-		//std::cout << "COLLISION DETECTER!" << std::endl;
-
+	
 	sg.DrawScene();
 	
 	//Render text (bitmap fonts) in screen coordinates. So use ortoghonal projection with viewport coordinates.
 	//Each glyph quad texture needs just one byte color channel: 0 in background and 1 for the actual character pixels. Use it for alpha blending
 	//text to be rendered in last place to be in front of everything
-	
-	//if(fontLoaded) {
-	//	glDisable(GL_DEPTH_TEST);
-	//	TextCommand textCmd = { "AVT 2025 Welcome:\nGood Luck!", {100, 200}, 0.5 };
-	//	//the glyph contains transparent background colors and non-transparent for the actual character pixels. So we use the blending
-	//	glEnable(GL_BLEND);  
-	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//	int m_viewport[4];
-	//	glGetIntegerv(GL_VIEWPORT, m_viewport);
+	/*
+	if(fontLoaded) {
+		glDisable(GL_DEPTH_TEST);
+		TextCommand textCmd = { "AVT 2025 Welcome:\nGood Luck!", {100, 200}, 0.5 };
+		//the glyph contains transparent background colors and non-transparent for the actual character pixels. So we use the blending
+		glEnable(GL_BLEND);  
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		int m_viewport[4];
+		glGetIntegerv(GL_VIEWPORT, m_viewport);
 
-	//	//viewer at origin looking down at  negative z direction
+		//viewer at origin looking down at  negative z direction
 
-	//	mu.loadIdentity(gmu::MODEL);
-	//	mu.loadIdentity(gmu::VIEW);
-	//	mu.pushMatrix(gmu::PROJECTION);
-	//	mu.loadIdentity(gmu::PROJECTION);
-	//	mu.ortho(m_viewport[0], m_viewport[0] + m_viewport[2] - 1, m_viewport[1], m_viewport[1] + m_viewport[3] - 1, -1, 1);
-	//	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
-	//	textCmd.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
-	//	renderer.renderText(textCmd);
-	//	mu.popMatrix(gmu::PROJECTION);
-	//	glDisable(GL_BLEND);
-	//	glEnable(GL_DEPTH_TEST);
-	//	
-	//}
-	
+		mu.loadIdentity(gmu::MODEL);
+		mu.loadIdentity(gmu::VIEW);
+		mu.pushMatrix(gmu::PROJECTION);
+		mu.loadIdentity(gmu::PROJECTION);
+		mu.ortho(m_viewport[0], m_viewport[0] + m_viewport[2] - 1, m_viewport[1], m_viewport[1] + m_viewport[3] - 1, -1, 1);
+		mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
+		textCmd.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
+		renderer.renderText(textCmd);
+		mu.popMatrix(gmu::PROJECTION);
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		
+	}
+	*/
 	glutSwapBuffers();
 }
 // ------------------------------------------------------------
@@ -386,8 +383,8 @@ void processKeys(unsigned char key, int xx, int yy)
 
 	if (key == 'r') { //reset
 		alpha = 57.0f; beta = 18.0f;  // Camera Spherical Coordinates
-		r = 45.0f;
-		camera->radious = r = 45.0f;
+		r = 5.0f;
+		camera->radious = r = 5.0f;
 		camera->localRotation[2] = alpha = -90.0f;
 		camera->localRotation[0] = beta = 18.0f;
 	}
@@ -572,7 +569,7 @@ void buildScene()
 
 	//drone
 	drone = sg.AddNode(CUBE, 4, objectTransforms[DRONEBODY]);
-
+	
 	sg.AddNode(CUBE, 4, Transform{
 		new vec3{ 1.0f, 1.0f,  1.0f},
 		new vec3{ 0.2f, 0.2f,  0.2f},
@@ -593,20 +590,17 @@ void buildScene()
 		new vec3{ 0.2f, 0.2f,  0.2f},
 		nullptr
 	}, drone);
-
+	
+	
 	//obstacle
 	for (int i = 0; i < maxObstacles; i++) {
 		obstacles[i] = sg.AddObstacle(CUBE, 3, objectTransforms[DRONEBODY], std::array<float, 3> {0.0f, 0.0f, 0.0f});
 	}
-
+	
+	
 	//BigBall
-	sg.AddNode(PAWN, 2, Transform{
-		new vec3{0.0f, 15.0f, 0.0f},
-		new	vec3{5.0f, 5.0f , 5.0f},
-		nullptr
-		}
-	);
-
+	sg.AddNode(PAWN, 2, objectTransforms[BIGBALL]);
+	
 	//lights
 	sg.directionalLightMode = directionalLightMode;
 	sg.pointLightMode = pointLightMode;
@@ -619,11 +613,11 @@ void buildScene()
 	}
 
 	sg.AddLight(new DirectionalLightNode(directionalLightPos));
-
+	
 	for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
 		sg.AddLight(new SpotLightNode(spotLightPos[i], coneDir[i], cutOff[i], drone));
 	}
-
+	
 	//camera
 	float target[3] = { 0.0f, 0.0f, 0.0f };
 	camera = new Camera{ target, drone };
