@@ -239,9 +239,9 @@ void applyKeys(bool ani) {
 			new vec3{
 				// this is using radians, since later the rotate is also in radians
 				// need to think why it needs to be negative
-					-currentSpeed * cos(-(*drone->localTransform.rotation)[1]) + currentSide * sin((*drone->localTransform.rotation)[1]),
+					-(currentSpeed * cos(-(*drone->localTransform.rotation)[1]) + currentSide * sin((*drone->localTransform.rotation)[1])),
 					-currentUp,
-					-currentSpeed * sin(-(*drone->localTransform.rotation)[1]) + currentSide * cos((*drone->localTransform.rotation)[1])
+					-(currentSpeed * sin(-(*drone->localTransform.rotation)[1]) + currentSide * cos((*drone->localTransform.rotation)[1]))
 				},
 				nullptr,
 				new vec3{ 0.0f, -tempAngle, 0.0f }
