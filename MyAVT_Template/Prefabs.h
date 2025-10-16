@@ -6,6 +6,8 @@
 #include "Transform.h"
 #include "mathUtility.h"
 
+struct AssimpMeshData;
+
 enum MaterialConfigs {
 	DEFAULT,
 	TRANSLUCENT
@@ -30,3 +32,6 @@ extern std::unordered_map<Objects, Transform> objectTransforms;
 // for bounding boxes
 extern std::unordered_map<Mesh, std::vector<float>> objectVertices;
 extern std::unordered_map<Mesh, int> objectNumberVertices;
+
+//assimp
+extern std::unordered_map<Mesh, struct AssimpMeshData> assimpMeshMap;

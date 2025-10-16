@@ -521,13 +521,13 @@ void mouseWheel(int wheel, int direction, int x, int y) {
 // Scene building with basic geometry
 //
 
-Node* AssimpImportBackpack() {
+Node* AssimpImport(std::string filepath, Mesh mesh) {
 	const aiScene* scene;
 	Assimp::Importer import;
 	GLuint* textId;
 
 	//import
-	if (!Import3DFromFile("assets/backpack/backpack.obj", import, scene)) {
+	if (!Import3DFromFile(filepath, import, scene, mesh)) {
 		std::cout << "FAILED IMPORT OF 3D FROM FILE" << std::endl;
 		exit(0);
 	}
@@ -535,13 +535,19 @@ Node* AssimpImportBackpack() {
 	//turn in vector of MyMesh
 	std::vector<MyMesh> obj = createMeshFromAssimp(scene, textId);
 	
+	assimpMeshMap[mesh] = AssimpMeshData();
+	assimpMeshMap[mesh].startMeshId = renderer.myMeshes.size();
+
 	//add to mesh vector
 	for each(MyMesh mesh in obj)
 	{
 		renderer.myMeshes.push_back(mesh);
 	}
 
+	assimpMeshMap[mesh].endMeshId = renderer.myMeshes.size() - 1;
+
 	//assimp
+	// JUST MISSING THIS BEING SET AUTOMATICALLY ON FUNCTION CALL
 	// we could mby load all required textures and assign an assimp object the needed texture so when it renders it then checks and uses them
 	// instead of it being loaded in the renderSim
 	renderer.TexObjArray.texture2D_Loader("assets/backpack/diffuse.jpg");
@@ -591,13 +597,20 @@ void buildScene()
 
 
 	//Assimp asset import
-	AssimpImportBackpack();
+	AssimpImport("assets/backpack/backpack.obj", BACKPACK);
+	AssimpImport("assets/cottage/cottage.obj", COTTAGE);
 
-	sg.AddAssimpNode(BACKPACKSTART, BACKPACKEND, 4, Transform{
-		new vec3{5.0f, 1.0f, 0.0f},
-		new vec3{1.0f, 1.0f, 1.0f},
-		new vec3{0.0f, 0.0f, 0.0f}
+	sg.AddAssimpNode(BACKPACK, assimpMeshMap[BACKPACK], 4, Transform{
+		new vec3{ 5.0f, 1.0f, 0.0f },
+		new vec3{ 1.0f, 1.0f, 1.0f },
+		new vec3{ 0.0f, 0.0f, 180.0f }
 	});
+
+	sg.AddAssimpNode(COTTAGE, assimpMeshMap[COTTAGE], 1, Transform{
+		new vec3{ 0.0f, 0.0f ,0.0f},
+		new vec3{ 1.0f, 1.0f ,1.0f},
+		new vec3{ 0.0f, 0.0f ,180.0f},
+	});	
 
 	//floor
 	Node* floor = sg.AddNode(QUAD, 3, objectTransforms[FLOOR]);

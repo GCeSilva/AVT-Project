@@ -1,4 +1,5 @@
 #include "Prefabs.h"
+#include "AssimpNode.h"
 
 // later change these to their own .h file
 std::unordered_map<Mesh, std::function<MyMesh()>> meshCreators = {
@@ -137,3 +138,6 @@ std::unordered_map<Mesh, int> objectNumberVertices = {
 	{CONE, 4*8},
 	{PAWN, 4 * 8},
 };
+
+//assimp
+std::unordered_map<Mesh, struct AssimpMeshData> assimpMeshMap;

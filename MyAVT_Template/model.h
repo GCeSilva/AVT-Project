@@ -18,8 +18,8 @@ enum Mesh {
 	CYLINDER,
 	CONE,
 	PAWN,
-	BACKPACKSTART,
-	BACKPACKEND = 84,
+	BACKPACK,
+	COTTAGE,
 };
 
 struct Material{

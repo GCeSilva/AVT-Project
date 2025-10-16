@@ -1,5 +1,6 @@
 #pragma once
 #include "Node.h"
+#include "Prefabs.h"
 
 /*
 * 
@@ -13,13 +14,17 @@
 * 
 */
 
+struct AssimpMeshData {
+	int startMeshId, endMeshId;
+};
+
 class AssimpNode : public Node {
 public:
-	AssimpNode(int startMeshId, int endMeshId, int textureId, Transform localTransform, Node* parent = nullptr) : 
-		Node(startMeshId, textureId, localTransform, parent) {
+	AssimpNode(int meshId, AssimpMeshData data, int textureId, Transform localTransform, Node* parent = nullptr) :
+		Node(meshId, textureId, localTransform, parent) {
 
-		this->startMeshId = startMeshId;
-		this->endMeshId = endMeshId;
+		this->startMeshId = data.startMeshId;
+		this->endMeshId = data.endMeshId;
 
 		this->hasSubMeshes = true;
 

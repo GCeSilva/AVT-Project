@@ -14,5 +14,5 @@
 #include "assimp/scene.h"
 
 
-bool Import3DFromFile(const std::string& pFile, Assimp::Importer& importer, const aiScene*& sc);
+bool Import3DFromFile(const std::string& pFile, Assimp::Importer& importer, const aiScene*& sc, Mesh mesh);
 std::vector<struct MyMesh> createMeshFromAssimp(const aiScene*& sc, GLuint*& textureIds);

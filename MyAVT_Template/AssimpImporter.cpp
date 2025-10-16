@@ -14,7 +14,7 @@ char model_dir[50];
 
 //############
 //these are going to disapear
-void get_vertices_for_node(const aiNode* nd, const aiScene* scene)
+void get_vertices_for_node(const aiNode* nd, const aiScene* scene, Mesh meshId)
 {
 	aiMatrix4x4 prev;
 	unsigned int n = 0, t;
@@ -27,25 +27,25 @@ void get_vertices_for_node(const aiNode* nd, const aiScene* scene)
 			aiVector3D tmp = mesh->mVertices[t];
 
 			//vec4 format for vector
-			objectVertices[BACKPACKSTART].push_back(tmp.x);
-			objectVertices[BACKPACKSTART].push_back(tmp.y);
-			objectVertices[BACKPACKSTART].push_back(tmp.z);
-			objectVertices[BACKPACKSTART].push_back(0.0f);
+			objectVertices[meshId].push_back(tmp.x);
+			objectVertices[meshId].push_back(tmp.y);
+			objectVertices[meshId].push_back(tmp.z);
+			objectVertices[meshId].push_back(0.0f);
 		}
 	}
 
 	// searches for max and min in submeshes of children
 	for (n = 0; n < nd->mNumChildren; ++n) {
-		get_vertices_for_node(nd->mChildren[n], scene);
+		get_vertices_for_node(nd->mChildren[n], scene, meshId);
 	}
 }
 
 
-void get_vertices(const aiScene* scene)
+void get_vertices(const aiScene* scene, Mesh mesh)
 {
-	objectVertices[BACKPACKSTART] = {};
-	get_vertices_for_node(scene->mRootNode, scene);
-	objectNumberVertices[BACKPACKSTART] = objectVertices[BACKPACKSTART].size();
+	objectVertices[mesh] = {};
+	get_vertices_for_node(scene->mRootNode, scene, mesh);
+	objectNumberVertices[mesh] = objectVertices[mesh].size();
 }
 //################
 
@@ -137,11 +137,11 @@ bool LoadGLTexturesTUs(const aiScene*& scene, GLuint*& textureIds, unordered_map
 }
 
 // only needs bounding box init methods
-bool Import3DFromFile(const std::string& pFile, Assimp::Importer& importer, const aiScene*& scene)
+bool Import3DFromFile(const std::string& pFile, Assimp::Importer& importer, const aiScene*& scene, Mesh mesh)
 {
 	//const aiScene* scene = NULL;
 
-	scene = importer.ReadFile(pFile, aiProcessPreset_TargetRealtime_Quality);
+	scene = importer.ReadFile(pFile, aiProcessPreset_TargetRealtime_Quality | aiProcess_MakeLeftHanded);
 
 	// if the import fails, ReadFile() returns a NULL pointer.
 	if (!scene)
@@ -156,7 +156,7 @@ bool Import3DFromFile(const std::string& pFile, Assimp::Importer& importer, cons
 	//#########################################
 	// what needs to be done is, the function should get all vertice positions and put them in the object vertices dic
 	// instead of finding directly the max and min, the bounding box class does that
-	get_vertices(scene);
+	get_vertices(scene, mesh);
 	//################################
 
 	// We're done. Everything will be cleaned up by the importer destructor

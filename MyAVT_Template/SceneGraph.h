@@ -40,7 +40,7 @@ public:
 
 	void RemoveNode(Node* node);
 	Node* AddNode(int meshId, int textureId, Transform localTransform, Node* parent = nullptr);
-	AssimpNode* AddAssimpNode(int startMeshId, int endMeshId, int textureId, Transform localTransform, Node* parent = nullptr);
+	AssimpNode* AddAssimpNode(Mesh meshId, AssimpMeshData data, int textureId, Transform localTransform, Node* parent = nullptr);
 
 	//LATER JUST MAKE AN ABSTRACTION SO THAT ADD NODE CAN ADD BOTH NODES
 	ObstacleNode* AddObstacle(int meshId, int textureId, Transform localTransform, std::array<float, 3> centre, Node* parent = nullptr);

@@ -38,9 +38,9 @@ Node* SceneGraph::AddNode(int meshId, int textureId, Transform localTransform, N
 
 	return newNode;
 }
-AssimpNode* SceneGraph::AddAssimpNode(int startMeshId, int endMeshId, int textureId, Transform localTransform, Node* parent) {
+AssimpNode* SceneGraph::AddAssimpNode(Mesh meshId, AssimpMeshData data, int textureId, Transform localTransform, Node* parent) {
 
-	AssimpNode* newNode = new AssimpNode(startMeshId, endMeshId, textureId, localTransform, parent);
+	AssimpNode* newNode = new AssimpNode(meshId, data, textureId, localTransform, parent);
 
 	if (parent)
 		parent->AddChild(newNode);
