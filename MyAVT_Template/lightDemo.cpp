@@ -29,6 +29,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "SceneGraph.h"
+#include "AssimpImporter.h"
 
 #define THRESHOLD 0.01f
 
@@ -275,7 +276,6 @@ void renderSim(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	renderer.activateRenderMeshesShaderProg(); // use the required GLSL program to draw the meshes with illumination
-
 	//Associar os Texture Units aos Objects Texture
 	//stone.tga loaded in TU0; checker.tga loaded in TU1;  lightwood.tga loaded in TU2 ; mosaic.tga loaded in TU3
 	renderer.setTexUnit(0, 0);
@@ -283,17 +283,22 @@ void renderSim(void) {
 	renderer.setTexUnit(2, 2);
 	renderer.setTexUnit(3, 3);
 
+	//assimp test
+	renderer.setTexUnit(4, 4);
+	renderer.setTexUnit(5, 5);
+	renderer.setTexUnit(6, 6);
+
 	// load identity matrices
 	sg.InitializeSceneGraph();
-	
+
 	obstacleBehaviour();
 
 	bool ani = animations();
 	
 	applyKeys(ani);
-	
+
 	sg.DrawScene();
-	
+
 	//Render text (bitmap fonts) in screen coordinates. So use ortoghonal projection with viewport coordinates.
 	//Each glyph quad texture needs just one byte color channel: 0 in background and 1 for the actual character pixels. Use it for alpha blending
 	//text to be rendered in last place to be in front of everything
@@ -516,6 +521,34 @@ void mouseWheel(int wheel, int direction, int x, int y) {
 // Scene building with basic geometry
 //
 
+Node* AssimpImportBackpack() {
+	const aiScene* scene;
+	Assimp::Importer import;
+	GLuint* textId;
+
+	//import
+	if (!Import3DFromFile("assets/backpack/backpack.obj", import, scene)) {
+		std::cout << "FAILED IMPORT OF 3D FROM FILE" << std::endl;
+		exit(0);
+	}
+
+	//turn in vector of MyMesh
+	std::vector<MyMesh> obj = createMeshFromAssimp(scene, textId);
+	
+	//add to mesh vector
+	for each(MyMesh mesh in obj)
+	{
+		renderer.myMeshes.push_back(mesh);
+	}
+
+	//assimp
+	// we could mby load all required textures and assign an assimp object the needed texture so when it renders it then checks and uses them
+	// instead of it being loaded in the renderSim
+	renderer.TexObjArray.texture2D_Loader("assets/backpack/diffuse.jpg");
+	renderer.TexObjArray.texture2D_Loader("assets/backpack/specular.jpg");
+	renderer.TexObjArray.texture2D_Loader("assets/backpack/normal.png");
+}
+
 void buildScene()
 {
 	//Texture Object definition
@@ -523,6 +556,7 @@ void buildScene()
 	renderer.TexObjArray.texture2D_Loader("assets/checker.png");
 	renderer.TexObjArray.texture2D_Loader("assets/lightwood.tga");
 	renderer.TexObjArray.texture2D_Loader("assets/mosaic.tga");
+
 
 	//Scene geometry with triangle meshes
 
@@ -555,8 +589,18 @@ void buildScene()
 		meshMaterials[TRANSLUCENT]
 	);
 
+
+	//Assimp asset import
+	AssimpImportBackpack();
+
+	sg.AddAssimpNode(BACKPACKSTART, BACKPACKEND, 4, Transform{
+		new vec3{5.0f, 1.0f, 0.0f},
+		new vec3{1.0f, 1.0f, 1.0f},
+		new vec3{0.0f, 0.0f, 0.0f}
+	});
+
 	//floor
-	sg.AddNode(QUAD, 3, objectTransforms[FLOOR]);
+	Node* floor = sg.AddNode(QUAD, 3, objectTransforms[FLOOR]);
 
 	// buildings
 	std::array<int, 2> domainX = { -2, 2 };
@@ -568,7 +612,7 @@ void buildScene()
 	CreateCity(&sg, domainX, domainY, blockSize, dbb, pdb);
 
 	//drone
-	drone = sg.AddNode(CUBE, 4, objectTransforms[DRONEBODY]);
+	drone = sg.AddNode(CUBE, 5, objectTransforms[DRONEBODY]);
 	
 	sg.AddNode(CUBE, 4, Transform{
 		new vec3{ 1.0f, 1.0f,  1.0f},
@@ -591,15 +635,13 @@ void buildScene()
 		nullptr
 	}, drone);
 	
-	
 	//obstacle
 	for (int i = 0; i < maxObstacles; i++) {
 		obstacles[i] = sg.AddObstacle(CUBE, 3, objectTransforms[DRONEBODY], std::array<float, 3> {0.0f, 0.0f, 0.0f});
 	}
 	
-	
 	//BigBall
-	sg.AddNode(PAWN, 2, objectTransforms[BIGBALL]);
+	sg.AddNode(SPHERE, 2, objectTransforms[BIGBALL]);
 	
 	//lights
 	sg.directionalLightMode = directionalLightMode;

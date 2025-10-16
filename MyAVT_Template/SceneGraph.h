@@ -1,9 +1,11 @@
 #pragma once
+#include <iostream>
 
 #include "LightNode.h"
 #include "ObstacleNode.h"
 #include "Camera.h"
 #include "Prefabs.h"
+#include "AssimpNode.h"
 
 #define NUM_POINT_LIGHTS 6
 #define NUM_SPOT_LIGHTS 2
@@ -38,6 +40,8 @@ public:
 
 	void RemoveNode(Node* node);
 	Node* AddNode(int meshId, int textureId, Transform localTransform, Node* parent = nullptr);
+	AssimpNode* AddAssimpNode(int startMeshId, int endMeshId, int textureId, Transform localTransform, Node* parent = nullptr);
+
 	//LATER JUST MAKE AN ABSTRACTION SO THAT ADD NODE CAN ADD BOTH NODES
 	ObstacleNode* AddObstacle(int meshId, int textureId, Transform localTransform, std::array<float, 3> centre, Node* parent = nullptr);
 	

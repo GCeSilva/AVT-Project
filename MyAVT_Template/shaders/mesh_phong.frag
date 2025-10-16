@@ -27,6 +27,12 @@ uniform sampler2D texmap1;
 uniform sampler2D texmap2;
 uniform sampler2D texmap3;
 
+//assimp
+
+uniform sampler2D diffuseTex;
+uniform sampler2D specularTex;
+uniform sampler2D normalTex;
+
 uniform vec4 dirLight;
 
 uniform int texMode;
@@ -43,7 +49,7 @@ uniform bool fogMode;
 out vec4 colorOut;
 
 void main() {
-	vec4 texel, texel1;
+	vec4 texel, texel1, texelDif, texelSpec, texelNorm;
 
 	vec4 spec = vec4(0.0);
 	float intensity = 0.0f;
@@ -132,6 +138,13 @@ void main() {
 	{
 		texel = texture(texmap3, DataIn.tex_coord);  // texel from mosaic.tga
 		color = vec4(max(intensitySum * texel + specSum, 0.07 * texel).rgb, mat.diffuse.a);
+	}
+	else if (texMode == 4)
+	{
+		texelDif = texture(diffuseTex, DataIn.tex_coord);
+		texelSpec = texture(specularTex, DataIn.tex_coord);
+
+		color = vec4(max(intensitySum * texelDif * texelSpec, 0.07 * texelDif * texelSpec).rgb, mat.diffuse.a);
 	}
 	else // multitexturing
 	{

@@ -38,6 +38,17 @@ Node* SceneGraph::AddNode(int meshId, int textureId, Transform localTransform, N
 
 	return newNode;
 }
+AssimpNode* SceneGraph::AddAssimpNode(int startMeshId, int endMeshId, int textureId, Transform localTransform, Node* parent) {
+
+	AssimpNode* newNode = new AssimpNode(startMeshId, endMeshId, textureId, localTransform, parent);
+
+	if (parent)
+		parent->AddChild(newNode);
+	else
+		head.push_back(newNode);
+
+	return newNode;
+}
 ObstacleNode* SceneGraph::AddObstacle(int meshId, int textureId, Transform localTransform, std::array<float, 3> centre, Node* parent) {
 	ObstacleNode* newNode = new ObstacleNode(meshId, textureId, localTransform, centre, parent);
 	if (parent)
@@ -99,7 +110,24 @@ void SceneGraph::DrawNode(Node* node) {
 	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
 	data.normal = mu.getNormalMatrix();
 
-	renderer.renderMesh(data);
+
+	if (node->HasSubMeshes()) {
+
+		std::array<int, 2>* bounds = node->GetBounds();
+		if(!bounds) {
+			std::cout << "null pointer on bound check of submesh drawing" << std::endl;
+			exit(0);
+		}
+
+		// this feels kinda scuffed, but it seems to work
+		for (int i = (*bounds)[0]; i <= (*bounds)[1]; i++) {
+			data.meshID = i;
+			renderer.renderMesh(data);
+		}
+	}
+	else
+		renderer.renderMesh(data);
+	
 	mu.popMatrix(gmu::MODEL);
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <list>
 #include <array>
+#include <iostream>
 #include "BoundingBox.h"
 
 class Node {
@@ -10,8 +11,10 @@ public:
 	Transform localTransform;
 	BoundingBox* boundingBox = nullptr;
 
+
 	Node(int meshId, int textureID, Transform localTransform, Node* parent = nullptr)
 	{
+
 		this->meshId = meshId;
 		this->textureId = textureID;
 		this->parent = parent;
@@ -26,7 +29,7 @@ public:
 			(*localTransform.rotation)[2] = (*localTransform.rotation)[2] * (PI / 180.0f);
 		}
 
-		boundingBox = new BoundingBox{ this };
+		this->boundingBox = new BoundingBox{ this };
 	}
 
 	virtual bool CollisionBehaviour(Node* other) { return true; }
@@ -35,6 +38,10 @@ public:
 	void RemoveNode(Node* node) { this->children.remove(node); }
 	Node* GetParent() { return this->parent; }
 	std::list<Node*> GetChildren() { return this->children; }
+	
+	//these are only for inheritance of AssimpNode
+	bool HasSubMeshes() { return this->hasSubMeshes; }
+	virtual std::array<int, 2>* GetBounds() { return nullptr; };
 
 	//since we will be adding upon our local transforms
 	//this might hell have to write a little less
@@ -44,7 +51,11 @@ public:
 		boundingBox->RecalculateBounds();
 	}
 
+protected:
+	bool hasSubMeshes = false;
+
 private:
 	Node* parent;
 	std::list<Node*> children = {};
+
 };

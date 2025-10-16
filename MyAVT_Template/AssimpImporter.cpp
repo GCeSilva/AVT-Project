@@ -1,23 +1,9 @@
 #include "AssimpImporter.h"
+#include "Prefabs.h"
 
 using namespace std;
 
 Texture texture;
-
-//#####################
-//this is in some other file i need to find to add to the includes
-enum AttribType {
-	VERTEX_COORD_ATTRIB,
-	NORMAL_ATTRIB,
-	TEXTURE_COORD_ATTRIB,
-	TANGENT_ATTRIB,
-	BITANGENT_ATTRIB,
-	VERTEX_ATTRIB1,
-	VERTEX_ATTRIB2,
-	VERTEX_ATTRIB3,
-	VERTEX_ATTRIB4
-};
-//#######################
 
 //###########################
 //this can be removed, since we should be giving it the file path directly
@@ -26,44 +12,40 @@ enum AttribType {
 char model_dir[50];
 //###########################
 
-#define aisgl_min(x,y) (x<y?x:y)
-#define aisgl_max(x,y) (y>x?y:x)
-
 //############
 //these are going to disapear
-void get_bounding_box_for_node(const aiNode* nd, const aiScene* scene, aiVector3D* min, aiVector3D* max)
+void get_vertices_for_node(const aiNode* nd, const aiScene* scene)
 {
 	aiMatrix4x4 prev;
 	unsigned int n = 0, t;
 
+	//gets absolote max and min vertices of children
 	for (; n < nd->mNumMeshes; ++n) {
 		const aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 		for (t = 0; t < mesh->mNumVertices; ++t) {
 
 			aiVector3D tmp = mesh->mVertices[t];
 
-			min->x = aisgl_min(min->x, tmp.x);
-			min->y = aisgl_min(min->y, tmp.y);
-			min->z = aisgl_min(min->z, tmp.z);
-
-			max->x = aisgl_max(max->x, tmp.x);
-			max->y = aisgl_max(max->y, tmp.y);
-			max->z = aisgl_max(max->z, tmp.z);
+			//vec4 format for vector
+			objectVertices[BACKPACKSTART].push_back(tmp.x);
+			objectVertices[BACKPACKSTART].push_back(tmp.y);
+			objectVertices[BACKPACKSTART].push_back(tmp.z);
+			objectVertices[BACKPACKSTART].push_back(0.0f);
 		}
 	}
 
+	// searches for max and min in submeshes of children
 	for (n = 0; n < nd->mNumChildren; ++n) {
-		get_bounding_box_for_node(nd->mChildren[n], scene, min, max);
+		get_vertices_for_node(nd->mChildren[n], scene);
 	}
 }
 
 
-void get_bounding_box(const aiScene* scene, aiVector3D* min, aiVector3D* max)
+void get_vertices(const aiScene* scene)
 {
-
-	min->x = min->y = min->z = 1e10f;
-	max->x = max->y = max->z = -1e10f;
-	get_bounding_box_for_node(scene->mRootNode, scene, min, max);
+	objectVertices[BACKPACKSTART] = {};
+	get_vertices_for_node(scene->mRootNode, scene);
+	objectNumberVertices[BACKPACKSTART] = objectVertices[BACKPACKSTART].size();
 }
 //################
 
@@ -90,6 +72,7 @@ void color4_to_float4(const aiColor4D* c, float f[4])
 }
 
 //not too sure how it works, need to compare with the shader on the other side to understand
+//i believe that as of now we arent really using this, although could be changed to create an automatic way of adding textures
 bool LoadGLTexturesTUs(const aiScene*& scene, GLuint*& textureIds, unordered_map<std::string, GLuint>& textureIdMap)  // Create OGL textures objects and maps them to texture units.  
 {
 	aiString path;	// filename
@@ -134,21 +117,27 @@ bool LoadGLTexturesTUs(const aiScene*& scene, GLuint*& textureIds, unordered_map
 		unordered_map<std::string, GLuint>::iterator itr = textureIdMap.begin();
 		filename = (*itr).first;  // get filename
 
+		//##########
 		//create the texture objects array and asssociate them with TU and place the TU in the key value of the map
+		//CHANGE THIS, IT CANT DO AN ARBITRARY FOLDER
 		for (int i = 0; itr != textureIdMap.end(); ++i, ++itr)
 		{
+
 			filename = (*itr).first;  // get filename
+			std::cout << filename << std::endl;
+			filename = "assets/backpack/" + filename;
 			texture.texture2D_Loader(filename.c_str());
 			//Texture2D_Loader(textureIds, filename.c_str(), i);  //it already performs glBindTexture(GL_TEXTURE_2D, textureIds[i])
 			(*itr).second = i;	  // save texture unit for filename in map
 			//printf("textura = %s  TU = %d\n", filename.c_str(), i);
 		}
+		//###########
 	}
 	return true;
 }
 
 // only needs bounding box init methods
-bool Import3DFromFile(const std::string& pFile, Assimp::Importer& importer, const aiScene*& scene, float& scaleFactor)
+bool Import3DFromFile(const std::string& pFile, Assimp::Importer& importer, const aiScene*& scene)
 {
 	//const aiScene* scene = NULL;
 
@@ -165,14 +154,9 @@ bool Import3DFromFile(const std::string& pFile, Assimp::Importer& importer, cons
 	printf("Import of scene %s succeeded.\n", pFile.c_str());
 
 	//#########################################
-	// this needs to all be changed so we can add our own bounding box implementation
-	aiVector3D scene_min, scene_max, scene_center;
-	get_bounding_box(scene, &scene_min, &scene_max);
-	float tmp;
-	tmp = scene_max.x - scene_min.x;
-	tmp = scene_max.y - scene_min.y > tmp ? scene_max.y - scene_min.y : tmp;
-	tmp = scene_max.z - scene_min.z > tmp ? scene_max.z - scene_min.z : tmp;
-	scaleFactor = 1.f / tmp;
+	// what needs to be done is, the function should get all vertice positions and put them in the object vertices dic
+	// instead of finding directly the max and min, the bounding box class does that
+	get_vertices(scene);
 	//################################
 
 	// We're done. Everything will be cleaned up by the importer destructor
@@ -200,7 +184,8 @@ vector<struct MyMesh> createMeshFromAssimp(const aiScene*& sc, GLuint*& textureI
 
 
 	//##
-	LoadGLTexturesTUs(sc, textureIds, textureIdMap); //it creates the unordered map which maps image filenames to texture units TU
+	// FOR NOW WE ARE NOT USING THIS, SO THERE IS NO POINT IN RUNNING IT
+	//LoadGLTexturesTUs(sc, textureIds, textureIdMap); //it creates the unordered map which maps image filenames to texture units TU
 	//##
 
 
@@ -248,8 +233,8 @@ vector<struct MyMesh> createMeshFromAssimp(const aiScene*& sc, GLuint*& textureI
 			glGenBuffers(1, &buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * mesh->mNumVertices, mesh->mVertices, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(VERTEX_COORD_ATTRIB);
-			glVertexAttribPointer(VERTEX_COORD_ATTRIB, 3, GL_FLOAT, 0, 0, 0);
+			glEnableVertexAttribArray(Shader::VERTEX_COORD_ATTRIB);
+			glVertexAttribPointer(Shader::VERTEX_COORD_ATTRIB, 3, GL_FLOAT, 0, 0, 0);
 		}
 
 		// buffer for vertex normals
@@ -257,24 +242,26 @@ vector<struct MyMesh> createMeshFromAssimp(const aiScene*& sc, GLuint*& textureI
 			glGenBuffers(1, &buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * mesh->mNumVertices, mesh->mNormals, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(NORMAL_ATTRIB);
-			glVertexAttribPointer(NORMAL_ATTRIB, 3, GL_FLOAT, 0, 0, 0);
+			glEnableVertexAttribArray(Shader::NORMAL_ATTRIB);
+			glVertexAttribPointer(Shader::NORMAL_ATTRIB, 3, GL_FLOAT, 0, 0, 0);
 		}
 
 		// buffers for vertex tangents and bitangents
-		if (mesh->HasTangentsAndBitangents()) {
+		// CURRENTLY WE DO NOT HAVE TANGENTS OR BIT TANGENTS
+		// it still runs even if we dont have a buffer place for it tho? i still reserves memory space so i commented it just in case
+		/*if (mesh->HasTangentsAndBitangents()) {
 			glGenBuffers(1, &buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * mesh->mNumVertices, mesh->mTangents, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(TANGENT_ATTRIB);
-			glVertexAttribPointer(TANGENT_ATTRIB, 3, GL_FLOAT, 0, 0, 0);
+			glEnableVertexAttribArray(Shader::TANGENT_ATTRIB);
+			glVertexAttribPointer(Shader::TANGENT_ATTRIB, 3, GL_FLOAT, 0, 0, 0);
 
 			glGenBuffers(1, &buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 3 * mesh->mNumVertices, mesh->mBitangents, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(BITANGENT_ATTRIB);
-			glVertexAttribPointer(BITANGENT_ATTRIB, 3, GL_FLOAT, 0, 0, 0);
-		}
+			glEnableVertexAttribArray(Shader::BITANGENT_ATTRIB);
+			glVertexAttribPointer(Shader::BITANGENT_ATTRIB, 3, GL_FLOAT, 0, 0, 0);
+		}*/
 
 		// buffer for vertex texture coordinates
 		if (mesh->HasTextureCoords(0)) {
@@ -286,8 +273,8 @@ vector<struct MyMesh> createMeshFromAssimp(const aiScene*& sc, GLuint*& textureI
 			glGenBuffers(1, &buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * mesh->mNumVertices, texCoords, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(TEXTURE_COORD_ATTRIB);
-			glVertexAttribPointer(TEXTURE_COORD_ATTRIB, 2, GL_FLOAT, 0, 0, 0);
+			glEnableVertexAttribArray(Shader::TEXTURE_COORD_ATTRIB);
+			glVertexAttribPointer(Shader::TEXTURE_COORD_ATTRIB, 2, GL_FLOAT, 0, 0, 0);
 		}
 
 		// unbind buffers

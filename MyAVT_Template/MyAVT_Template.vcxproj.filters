@@ -127,5 +127,8 @@
     <ClInclude Include="AssimpImporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AssimpNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

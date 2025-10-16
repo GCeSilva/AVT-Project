@@ -9,6 +9,7 @@
 enum texType {DIFFUSE, SPECULAR, NORMALS, BUMP};
 
 
+//CHANGE THIS TO AN UNORDERED DICTIONARY LATER
 enum Mesh {
 	QUAD,
 	CUBE,
@@ -16,7 +17,9 @@ enum Mesh {
 	TORUS,
 	CYLINDER,
 	CONE,
-	PAWN
+	PAWN,
+	BACKPACKSTART,
+	BACKPACKEND = 84,
 };
 
 struct Material{

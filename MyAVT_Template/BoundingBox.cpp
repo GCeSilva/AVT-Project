@@ -45,12 +45,7 @@ void BoundingBox::RecalculateBounds() {
 	}
 	//clear stack
 	for(int i = 0; i < parentCount; i++)
-		mu.popMatrix(gmu::MODEL);/*
-	std::cout << "Mesh Objects: " << parent->meshId << std::endl;
-	std::cout << "maxBounds: \n\tx: " << maxBounds[0] << "\n\ty: " << maxBounds[1] << "\n\tz: " << maxBounds[2] << std::endl;
-	std::cout << "minBounds: \n\tx: " << minBounds[0] << "\n\ty: " << minBounds[1] << "\n\tz: " << minBounds[2] << std::endl;
-	std::cout << "######" << std::endl;*/
-
+		mu.popMatrix(gmu::MODEL);
 }
 // ahah sadge
 int BoundingBox::calculateParentAccumulativeTransform(Node* parent) {

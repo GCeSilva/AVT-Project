@@ -183,6 +183,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssimpImporter.h" />
+    <ClInclude Include="AssimpNode.h" />
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="cube.h" />
