@@ -78,7 +78,7 @@ char s[32];
 
 //lights
 // probably at some point remove this from here and put it on its own file or something
-float directionalLightPos[4] = { 1.0f, 1000.0f, 1.0f, 0.0f };
+float directionalLightPos[4] = { 1000.0f, 1000.0f, 1.0f, 0.0f };
 bool directionalLightMode = true;
 
 float pointLightPos[NUM_POINT_LIGHTS][4] = {
@@ -535,6 +535,8 @@ Node* AssimpImport(std::string filepath, Mesh mesh) {
 	//turn in vector of MyMesh
 	std::vector<MyMesh> obj = createMeshFromAssimp(scene, textId);
 	
+	std::cout << renderer.myMeshes.size() << std::endl;
+
 	assimpMeshMap[mesh] = AssimpMeshData();
 	assimpMeshMap[mesh].startMeshId = renderer.myMeshes.size();
 
@@ -545,14 +547,7 @@ Node* AssimpImport(std::string filepath, Mesh mesh) {
 	}
 
 	assimpMeshMap[mesh].endMeshId = renderer.myMeshes.size() - 1;
-
-	//assimp
-	// JUST MISSING THIS BEING SET AUTOMATICALLY ON FUNCTION CALL
-	// we could mby load all required textures and assign an assimp object the needed texture so when it renders it then checks and uses them
-	// instead of it being loaded in the renderSim
-	renderer.TexObjArray.texture2D_Loader("assets/backpack/diffuse.jpg");
-	renderer.TexObjArray.texture2D_Loader("assets/backpack/specular.jpg");
-	renderer.TexObjArray.texture2D_Loader("assets/backpack/normal.png");
+	std::cout << renderer.myMeshes.size() << std::endl;
 }
 
 void buildScene()
@@ -562,6 +557,15 @@ void buildScene()
 	renderer.TexObjArray.texture2D_Loader("assets/checker.png");
 	renderer.TexObjArray.texture2D_Loader("assets/lightwood.tga");
 	renderer.TexObjArray.texture2D_Loader("assets/mosaic.tga");
+
+
+	//assimp
+	// JUST MISSING THIS BEING SET AUTOMATICALLY ON FUNCTION CALL
+	// we could mby load all required textures and assign an assimp object the needed texture so when it renders it then checks and uses them
+	// instead of it being loaded in the renderSim
+	renderer.TexObjArray.texture2D_Loader("assets/backpack/diffuse.jpg");
+	renderer.TexObjArray.texture2D_Loader("assets/backpack/specular.jpg");
+	renderer.TexObjArray.texture2D_Loader("assets/backpack/normal.png");
 
 
 	//Scene geometry with triangle meshes
@@ -597,17 +601,17 @@ void buildScene()
 
 
 	//Assimp asset import
-	AssimpImport("assets/backpack/backpack.obj", BACKPACK);
-	AssimpImport("assets/cottage/cottage.obj", COTTAGE);
+	//AssimpImport("assets/backpack/backpack.obj", BACKPACK);
+	AssimpImport("assets/drone/Drone.fbx", COTTAGE);
 
-	sg.AddAssimpNode(BACKPACK, assimpMeshMap[BACKPACK], 4, Transform{
+	/*sg.AddAssimpNode(BACKPACK, assimpMeshMap[BACKPACK], 4, Transform{
 		new vec3{ 5.0f, 1.0f, 0.0f },
 		new vec3{ 1.0f, 1.0f, 1.0f },
 		new vec3{ 0.0f, 0.0f, 180.0f }
 	});
-
+	*/
 	sg.AddAssimpNode(COTTAGE, assimpMeshMap[COTTAGE], 1, Transform{
-		new vec3{ 0.0f, 0.0f ,0.0f},
+		new vec3{ 0.0f, 1.0f ,0.0f},
 		new vec3{ 1.0f, 1.0f ,1.0f},
 		new vec3{ 0.0f, 0.0f ,180.0f},
 	});	
@@ -672,10 +676,14 @@ void buildScene()
 	for (int i = 0; i < NUM_SPOT_LIGHTS; i++) {
 		sg.AddLight(new SpotLightNode(spotLightPos[i], coneDir[i], cutOff[i], drone));
 	}
-	
+
 	//camera
 	float target[3] = { 0.0f, 0.0f, 0.0f };
-	camera = new Camera{ target, drone };
+	camera = new Camera{ target, new Node(QUAD, 0, Transform{
+		new vec3{0.0f,3.8f,0.0f},
+		new vec3{1.0f,0.4f,1.0f},
+		new vec3{0.0f,0.0f,180.0f}
+	}), drone};
 	//little hack
 	alpha = camera->localRotation[2];
 	beta = camera->localRotation[0];
@@ -722,7 +730,7 @@ int main(int argc, char **argv) {
 
 //  GLUT initialization
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA|GLUT_MULTISAMPLE);
+	glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA|GLUT_MULTISAMPLE | GLUT_STENCIL);
 
 	glutInitContextVersion (4, 3);
 	glutInitContextProfile (GLUT_CORE_PROFILE );
@@ -764,6 +772,10 @@ int main(int argc, char **argv) {
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	glClearStencil(0x00);
+	glEnable(GL_STENCIL_TEST);
+
 	glClearColor(0.5, 0.6, 0.7, 1.0f);
 
 	printf ("Vendor: %s\n"	, glGetString (GL_VENDOR));

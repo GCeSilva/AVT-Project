@@ -20,16 +20,21 @@ public:
 
 	CameraState currentState = FollowPlayerPersp;
 
-	Node* parent = nullptr;
 
-	Camera(float target[3], Node* parent = nullptr) {
+	Camera(float target[3], Node* stencilNode = nullptr, Node* parent = nullptr) {
 		memcpy(lookTarget, target, sizeof(float) * 3);
 
 		this->parent = parent;
+		this->stencilShape = stencilNode;
 	}
 	void RenderCamera();
+	void RenderRearView();
+	void invCamera();
 private:
 	void RenderFollow();
 	void RenderTopDownPersp();
 	void RenderTopDownOrtho();
+
+	Node* parent = nullptr;
+	Node* stencilShape;
 };

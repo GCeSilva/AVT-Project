@@ -141,7 +141,7 @@ bool Import3DFromFile(const std::string& pFile, Assimp::Importer& importer, cons
 {
 	//const aiScene* scene = NULL;
 
-	scene = importer.ReadFile(pFile, aiProcessPreset_TargetRealtime_Quality | aiProcess_MakeLeftHanded);
+	scene = importer.ReadFile(pFile, aiProcessPreset_TargetRealtime_Quality | aiProcess_MakeLeftHanded | aiProcess_PreTransformVertices);
 
 	// if the import fails, ReadFile() returns a NULL pointer.
 	if (!scene)

@@ -70,11 +70,28 @@ void SceneGraph::DrawScene() {
 	//Lights
 	CalculateLights();
 
-	//Objects
+	//part that is not drawn on stencil
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilMask(0x00);
+
+	//draw scene
 	for each(Node * child in head)
 	{
 		SceneGraph::DrawNode(child);
 	}
+
+	//part drawn on stencil
+	activeCamera->invCamera();
+	//Lights
+	CalculateLights();
+
+	glStencilFunc(GL_EQUAL, 1, 0xFF);
+	//draw scene
+	for each(Node * child in head)
+	{
+		SceneGraph::DrawNode(child);
+	}
+
 }
 
 void SceneGraph::DrawNode(Node* node) {

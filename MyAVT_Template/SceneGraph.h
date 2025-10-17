@@ -46,13 +46,14 @@ public:
 	ObstacleNode* AddObstacle(int meshId, int textureId, Transform localTransform, std::array<float, 3> centre, Node* parent = nullptr);
 	
 	void DrawScene();
+	//do NOT use manualy, its called by another function
+	static void DrawNode(Node* node);
 
 private:
 	std::list<Node*> head;
 
 	std::list<LightNode*> lights;
 
-	void DrawNode(Node* node);
 	void CalculateLights();
 };
 
