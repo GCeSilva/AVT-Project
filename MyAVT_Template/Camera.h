@@ -30,6 +30,7 @@ public:
 	void RenderCamera();
 	void RenderRearView();
 	void invCamera();
+	Node* GetParent() { return this->parent; }
 private:
 	void RenderFollow();
 	void RenderTopDownPersp();

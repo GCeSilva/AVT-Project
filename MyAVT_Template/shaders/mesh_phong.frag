@@ -28,10 +28,11 @@ uniform sampler2D texmap2;
 uniform sampler2D texmap3;
 
 //assimp
-
 uniform sampler2D diffuseTex;
 uniform sampler2D specularTex;
 uniform sampler2D normalTex;
+//tree sprite
+uniform sampler2D treeTex;
 
 uniform vec4 dirLight;
 
@@ -49,7 +50,7 @@ uniform bool fogMode;
 out vec4 colorOut;
 
 void main() {
-	vec4 texel, texel1, texelDif, texelSpec, texelNorm;
+	vec4 texel, texel1, texelDif, texelSpec, texelNorm, texelTree;
 
 	vec4 spec = vec4(0.0);
 	float intensity = 0.0f;
@@ -145,6 +146,15 @@ void main() {
 		texelSpec = texture(specularTex, DataIn.tex_coord);
 
 		color = vec4(max(intensitySum * texelDif * texelSpec, 0.07 * texelDif * texelSpec).rgb, mat.diffuse.a);
+	}
+	else if (texMode == 5){
+		texelTree = texture(treeTex, DataIn.tex_coord);
+		if(texelTree.a == 0.0){
+			discard;
+		}
+		else{
+			color = vec4(max(intensitySum * texelTree + specSum, 0.07 * texelTree).rgb, texelTree.a);
+		}
 	}
 	else // multitexturing
 	{

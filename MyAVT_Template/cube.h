@@ -152,9 +152,9 @@ float quad_normals[] = {	//Quad normals
 
 float quad_texCoords[] = {	//Quad texture coordinates
 	0.0f, 0.0f, 0.0f, 1.0f,
-	64.0f, 0.0f, 0.0f, 1.0f,
-	64.0f, 64.0f, 0.0f, 1.0f,
-	0.0f, 64.0f, 0.0f, 1.0f
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f
 };
 
 unsigned int faceIndex[] = {

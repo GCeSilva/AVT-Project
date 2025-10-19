@@ -50,6 +50,8 @@ Renderer renderer;
 
 SceneGraph sg;
 Node* drone;
+//temporary
+Node* tree;
 
 // Controls
 std::array<int, 8> speedKeys;
@@ -139,7 +141,24 @@ bool animations() {
 			new vec3{ 0.0f, 5.0f, 0.0f }
 			});
 	}
+	//tree sprite billboarding
+	float tempRot[3];
+	tempRot[0] = camera->radious * sin(camera->localRotation[2] * 3.14f / 180.0f + (*camera->GetParent()->localTransform.rotation)[1]) * cos(camera->localRotation[0] * 3.14f / 180.0f);
+	tempRot[1] = camera->radious * sin(camera->localRotation[0] * 3.14f / 180.0f);
+	tempRot[2] = camera->radious * cos(camera->localRotation[2] * 3.14f / 180.0f + (*camera->GetParent()->localTransform.rotation)[1]) * cos(camera->localRotation[0] * 3.14f / 180.0f);
 
+	float alpha = atan2f(
+		(tempRot[0] + (*camera->GetParent()->localTransform.translation)[0]) - (*tree->localTransform.translation)[0],
+		(tempRot[2] + (*camera->GetParent()->localTransform.translation)[2]) - (*tree->localTransform.translation)[2]
+	);
+
+	tree->localTransform.rotation = new vec3{
+		0.0f,
+		alpha,
+		0.0f
+	};
+
+	//#######################
 	float transformCheck = 0.0f;
 
 	if (speedKeys[0] != 0 || speedKeys[1] != 0) {
@@ -287,6 +306,8 @@ void renderSim(void) {
 	renderer.setTexUnit(4, 4);
 	renderer.setTexUnit(5, 5);
 	renderer.setTexUnit(6, 6);
+
+	renderer.setTexUnit(7, 7);
 
 	// load identity matrices
 	sg.InitializeSceneGraph();
@@ -567,6 +588,8 @@ void buildScene()
 	renderer.TexObjArray.texture2D_Loader("assets/backpack/specular.jpg");
 	renderer.TexObjArray.texture2D_Loader("assets/backpack/normal.png");
 
+	renderer.TexObjArray.texture2D_Loader("assets/tree.png");
+
 
 	//Scene geometry with triangle meshes
 
@@ -610,14 +633,21 @@ void buildScene()
 		new vec3{ 0.0f, 0.0f, 180.0f }
 	});
 	*/
-	sg.AddAssimpNode(COTTAGE, assimpMeshMap[COTTAGE], 1, Transform{
+	/*sg.AddAssimpNode(COTTAGE, assimpMeshMap[COTTAGE], 1, Transform{
 		new vec3{ 0.0f, 1.0f ,0.0f},
 		new vec3{ 1.0f, 1.0f ,1.0f},
 		new vec3{ 0.0f, 0.0f ,180.0f},
-	});	
+	});*/	
 
 	//floor
 	Node* floor = sg.AddNode(QUAD, 3, objectTransforms[FLOOR]);
+
+	//twee
+	tree = sg.AddNode(QUAD, 5, Transform{
+		new vec3{0.0f, 1.0f, 0.0f},
+		new vec3{2.0f, 2.0f, 2.0f},
+		new vec3{0.0f, 0.0f, 0.0f}
+	});
 
 	// buildings
 	std::array<int, 2> domainX = { -2, 2 };
@@ -629,24 +659,24 @@ void buildScene()
 	CreateCity(&sg, domainX, domainY, blockSize, dbb, pdb);
 
 	//drone
-	drone = sg.AddNode(CUBE, 5, objectTransforms[DRONEBODY]);
+	drone = sg.AddNode(CUBE, 10, objectTransforms[DRONEBODY]);
 	
-	sg.AddNode(CUBE, 4, Transform{
+	sg.AddNode(CUBE, 10, Transform{
 		new vec3{ 1.0f, 1.0f,  1.0f},
 		new vec3{ 0.2f, 0.2f,  0.2f},
 		nullptr
 	}, drone);
-	sg.AddNode(CUBE, 4, Transform{
+	sg.AddNode(CUBE, 10, Transform{
 		new vec3{ 1.0f, 1.0f, -1.0f},
 		new vec3{ 0.2f, 0.2f,  0.2f},
 		nullptr
 	}, drone);
-	sg.AddNode(CUBE, 4, Transform{
+	sg.AddNode(CUBE, 10, Transform{
 		new vec3{-1.0f, 1.0f,  1.0f},
 		new vec3{ 0.2f, 0.2f,  0.2f},
 		nullptr
 	}, drone);
-	sg.AddNode(CUBE, 4, Transform{
+	sg.AddNode(CUBE, 10, Transform{
 		new vec3{-1.0f, 1.0f, -1.0f},
 		new vec3{ 0.2f, 0.2f,  0.2f},
 		nullptr

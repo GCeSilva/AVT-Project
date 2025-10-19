@@ -163,6 +163,9 @@ bool Renderer::setRenderMeshesShaderProg(const std::string& vertShaderPath, cons
     tex_loc[5] = glGetUniformLocation(program, "specularTex");
     tex_loc[6] = glGetUniformLocation(program, "normalTex");
 
+    //billboard tree
+    tex_loc[7] = glGetUniformLocation(program, "treeTex");
+
 
     return(shader.isProgramLinked() && shader.isProgramValid());
 }
