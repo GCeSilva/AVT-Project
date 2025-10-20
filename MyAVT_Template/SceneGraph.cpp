@@ -57,6 +57,9 @@ ObstacleNode* SceneGraph::AddObstacle(int meshId, int textureId, Transform local
 		head.push_back(newNode);
 	return newNode;
 }
+void SceneGraph::AddFloor(int meshId, int textureId, Transform localTransform, int pos) {
+	floor[pos] = new Node(meshId, textureId, localTransform);
+}
 
 void SceneGraph::AddLight(LightNode* light) {
 	lights.push_back(light);
@@ -64,8 +67,83 @@ void SceneGraph::AddLight(LightNode* light) {
 
 void SceneGraph::DrawScene() {
 
+	//stencil setup
+	glClearStencil(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 	//Cameras
 	activeCamera->RenderCamera();
+
+	//##########################
+	// Planar Reflextions
+
+	glStencilFunc(GL_NEVER, 0x2, 0xFF);
+	glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
+	glStencilMask(0xFF);
+
+	DrawNode(floor[0]);
+
+	glStencilFunc(GL_EQUAL, 0x2, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	//stop writing to stencil mask
+	glStencilMask(0x00);
+
+	for each(LightNode * light in lights) {
+		light->position[1] = -light->position[1];
+	}
+	CalculateLights();
+
+	glCullFace(GL_FRONT);
+	for each(Node * child in head)
+	{
+		SceneGraph::InvDrawNode(child);
+	}
+	glCullFace(GL_BACK);
+
+	//revert lights
+	for each(LightNode * light in lights) {
+		light->position[1] = -light->position[1];
+	}
+	CalculateLights();
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);		// Blend specular floor with reflected geometry
+
+	DrawNode(floor[0]);
+
+
+	//###########################################################
+	// SHADOW PASS
+	//float plane[3] = { 0.0f, 1.0f, 0.0f }; // plane equation y=0
+	//glDisable(GL_DEPTH_TEST);
+	////Dark the color stored in color buffer
+	//glBlendFunc(GL_DST_COLOR, GL_ZERO);
+	//glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
+
+	//for each(LightNode* light in lights) {
+	//	float mat[16];
+	//	mu.shadow_matrix(
+	//		mat,
+	//		plane,
+	//		light->position  // light position
+	//	);
+
+	//
+	//	mu.pushMatrix(gmu::MODEL);
+	//	mu.multMatrix(gmu::MODEL, mat);
+	//	SceneGraph::DrawNode(floor[1]);
+	//	for each(Node * child in head)
+	//	{
+	//		SceneGraph::DrawNode(child);
+	//	}
+	//	mu.popMatrix(gmu::MODEL);
+
+	//}
+	//
+	//glEnable(GL_DEPTH_TEST);
+
+	//##########################
+	//Normal draw
 
 	//Lights
 	CalculateLights();
@@ -75,23 +153,30 @@ void SceneGraph::DrawScene() {
 	glStencilMask(0x00);
 
 	//draw scene
+	SceneGraph::DrawNode(floor[1]);
 	for each(Node * child in head)
 	{
 		SceneGraph::DrawNode(child);
 	}
+	//transparent part last
+	//SceneGraph::DrawNode(floor[0]);
 
 	//part drawn on stencil
 	activeCamera->invCamera();
 	//Lights
 	CalculateLights();
 
+	//stencil bit
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
+	
 	//draw scene
+	SceneGraph::DrawNode(floor[1]);
 	for each(Node * child in head)
 	{
 		SceneGraph::DrawNode(child);
 	}
-
+	//transparent part last
+	//SceneGraph::DrawNode(floor[0]);
 }
 
 void SceneGraph::DrawNode(Node* node) {
@@ -145,6 +230,63 @@ void SceneGraph::DrawNode(Node* node) {
 	else
 		renderer.renderMesh(data);
 	
+	mu.popMatrix(gmu::MODEL);
+}
+void SceneGraph::InvDrawNode(Node* node) {
+	dataMesh data;
+
+	mu.pushMatrix(gmu::MODEL);
+
+	if (node->localTransform.translation && node->GetParent() == nullptr)
+		mu.translate(gmu::MODEL, (*node->localTransform.translation)[0], -(*node->localTransform.translation)[1], (*node->localTransform.translation)[2]);
+	else if (node->localTransform.translation)
+		mu.translate(gmu::MODEL, (*node->localTransform.translation)[0], (*node->localTransform.translation)[1], (*node->localTransform.translation)[2]);
+
+	if (node->localTransform.rotation) {
+		//rotate assumes that the angle is in degrees
+		//this needs refactoring, it ruins quad normals
+		mu.rotate(gmu::MODEL, (*node->localTransform.rotation)[1] / (PI / 180.0f), 0.0f, 1.0f, 0.0f);
+		mu.rotate(gmu::MODEL, (*node->localTransform.rotation)[2] / (PI / 180.0f), 0.0f, 0.0f, 1.0f);
+		mu.rotate(gmu::MODEL, (*node->localTransform.rotation)[0] / (PI / 180.0f), 1.0f, 0.0f, 0.0f);
+	}
+
+	if (node->localTransform.scale && node->GetParent() == nullptr)
+		mu.scale(gmu::MODEL, (*node->localTransform.scale)[0], -(*node->localTransform.scale)[1], (*node->localTransform.scale)[2]);
+	else if (node->localTransform.scale)
+		mu.scale(gmu::MODEL, (*node->localTransform.scale)[0], (*node->localTransform.scale)[1], (*node->localTransform.scale)[2]);
+
+	for each(Node * child in node->GetChildren())
+	{
+		SceneGraph::DrawNode(child);
+	}
+
+	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
+	mu.computeNormalMatrix3x3();
+
+	data.meshID = node->meshId;
+	data.texMode = node->textureId;
+	data.vm = mu.get(gmu::VIEW_MODEL);
+	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
+	data.normal = mu.getNormalMatrix();
+
+
+	if (node->HasSubMeshes()) {
+
+		std::array<int, 2>* bounds = node->GetBounds();
+		if (!bounds) {
+			std::cout << "null pointer on bound check of submesh drawing" << std::endl;
+			exit(0);
+		}
+
+		// this feels kinda scuffed, but it seems to work
+		for (int i = (*bounds)[0]; i <= (*bounds)[1]; i++) {
+			data.meshID = i;
+			renderer.renderMesh(data);
+		}
+	}
+	else
+		renderer.renderMesh(data);
+
 	mu.popMatrix(gmu::MODEL);
 }
 

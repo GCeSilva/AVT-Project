@@ -41,6 +41,10 @@ public:
 	void RemoveNode(Node* node);
 	Node* AddNode(int meshId, int textureId, Transform localTransform, Node* parent = nullptr);
 	AssimpNode* AddAssimpNode(Mesh meshId, AssimpMeshData data, int textureId, Transform localTransform, Node* parent = nullptr);
+	void AddFloor(int meshId, int textureId, Transform localTransform, int pos);
+
+	std::array<Node*, 2> GetFloor() { return floor; }
+	void SceneGraph::InvDrawNode(Node* node);
 
 	//LATER JUST MAKE AN ABSTRACTION SO THAT ADD NODE CAN ADD BOTH NODES
 	ObstacleNode* AddObstacle(int meshId, int textureId, Transform localTransform, std::array<float, 3> centre, Node* parent = nullptr);
@@ -53,6 +57,8 @@ private:
 	std::list<Node*> head;
 
 	std::list<LightNode*> lights;
+
+	std::array<Node*, 2> floor;
 
 	void CalculateLights();
 };

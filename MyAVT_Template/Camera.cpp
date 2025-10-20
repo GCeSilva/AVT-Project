@@ -164,8 +164,6 @@ void Camera::RenderRearView() {
 
 }
 
-
-//it seems that the spot light is camera dependent(????????)
 void Camera::invCamera() {
 
 	mu.loadIdentity(gmu::VIEW);

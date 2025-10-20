@@ -39,7 +39,7 @@ std::unordered_map<Objects, Transform> objectTransforms = {
 		new vec3 { -90.0f, 0.0f, 0.0f }
 	}},
 	{ BUILDING, {
-		new vec3 { 0.0f, 0.5f, 0.0f },
+		new vec3 { 0.0f, 2.5f, 0.0f },
 		new vec3 { 2.0f, 5.0f, 2.0f },
 		nullptr
 	}},
@@ -128,6 +128,12 @@ std::unordered_map<Mesh, std::vector<float>> objectVertices = {
 	 -1.0f,  3.5f,  -1.0f,  1.0f,
 	  1.0f,  3.5f,  -1.0f,  1.0f,
 	}},
+	{ QUADTRANS, {   //Quad 
+	-0.5f, -0.5f, 0.0f, 1.0f,  //BL
+	 0.5f, -0.5f, 0.0f, 1.0f,	//BR
+	 0.5f,  0.5f, 0.0f, 1.0f,	//TR
+	-0.5f,  0.5f, 0.0f, 1.0f,	//TL
+	}},
 };
 std::unordered_map<Mesh, int> objectNumberVertices = {
 	{QUAD, 4*4},
@@ -137,6 +143,7 @@ std::unordered_map<Mesh, int> objectNumberVertices = {
 	{CYLINDER, 4*8},
 	{CONE, 4*8},
 	{PAWN, 4 * 8},
+	{QUADTRANS, 4 * 4},
 };
 
 //assimp

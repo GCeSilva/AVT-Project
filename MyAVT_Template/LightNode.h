@@ -11,7 +11,6 @@ public:
 
 	int shaderArrayIndex;
 
-protected:
 	float position[4];
 
 private:

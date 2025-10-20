@@ -208,6 +208,11 @@ bool droneCollisionCheck() {
 		if (drone->boundingBox->CheckCollision(node->boundingBox))
 			return node->CollisionBehaviour(drone);
 	}
+	for each(Node* node in sg.GetFloor())
+	{
+		if (drone->boundingBox->CheckCollision(node->boundingBox))
+			return node->CollisionBehaviour(drone);
+	}
 	return false;
 }
 
@@ -621,6 +626,10 @@ void buildScene()
 		meshCreators[PAWN](),
 		meshMaterials[TRANSLUCENT]
 	);
+	createGeometry(
+		meshCreators[QUAD](),
+		meshMaterials[TRANSLUCENT]
+	);
 
 
 	//Assimp asset import
@@ -640,11 +649,18 @@ void buildScene()
 	});*/	
 
 	//floor
-	Node* floor = sg.AddNode(QUAD, 3, objectTransforms[FLOOR]);
+	sg.AddFloor(QUADTRANS, 0, objectTransforms[FLOOR], 0);
+
+	sg.AddFloor(1, 2, Transform{
+		new vec3{0.0f, -1.0f, 0.0f},
+		new vec3{1000.0f, 0.01f, 1000.0f},
+		new vec3{0.0f, 0.0f, 0.0f}
+	}, 1);
+
 
 	//twee
 	tree = sg.AddNode(QUAD, 5, Transform{
-		new vec3{0.0f, 1.0f, 0.0f},
+		new vec3{0.0f, 1.5f, 0.0f},
 		new vec3{2.0f, 2.0f, 2.0f},
 		new vec3{0.0f, 0.0f, 0.0f}
 	});

@@ -18,6 +18,7 @@ enum Mesh {
 	CYLINDER,
 	CONE,
 	PAWN,
+	QUADTRANS,
 	BACKPACK,
 	COTTAGE,
 };
