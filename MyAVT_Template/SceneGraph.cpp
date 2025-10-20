@@ -81,7 +81,7 @@ void SceneGraph::DrawScene() {
 	glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
 	glStencilMask(0xFF);
 
-	DrawNode(floor[0]);
+	DrawNode(floor[0], false);
 
 	glStencilFunc(GL_EQUAL, 0x2, 0xFF);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
@@ -96,7 +96,7 @@ void SceneGraph::DrawScene() {
 	glCullFace(GL_FRONT);
 	for each(Node * child in head)
 	{
-		SceneGraph::InvDrawNode(child);
+		SceneGraph::InvDrawNode(child, false);
 	}
 	glCullFace(GL_BACK);
 
@@ -109,54 +109,55 @@ void SceneGraph::DrawScene() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);		// Blend specular floor with reflected geometry
 
-	DrawNode(floor[0]);
+	DrawNode(floor[0], false);
 
 
 	//###########################################################
 	// SHADOW PASS
-	//float plane[3] = { 0.0f, 1.0f, 0.0f }; // plane equation y=0
-	//glDisable(GL_DEPTH_TEST);
-	////Dark the color stored in color buffer
-	//glBlendFunc(GL_DST_COLOR, GL_ZERO);
-	//glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
+	float plane[4] = { 0.0f, 1.0f, 0.0f, 0.0f }; // plane equation y=0
+	glDepthMask(GL_FALSE);
+	//Dark the color stored in color buffer
+	glBlendFunc(GL_DST_COLOR, GL_ZERO);
 
-	//for each(LightNode* light in lights) {
-	//	float mat[16];
-	//	mu.shadow_matrix(
-	//		mat,
-	//		plane,
-	//		light->position  // light position
-	//	);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(-0.5f, -0.5f);
 
-	//
-	//	mu.pushMatrix(gmu::MODEL);
-	//	mu.multMatrix(gmu::MODEL, mat);
-	//	SceneGraph::DrawNode(floor[1]);
-	//	for each(Node * child in head)
-	//	{
-	//		SceneGraph::DrawNode(child);
-	//	}
-	//	mu.popMatrix(gmu::MODEL);
+	float mat[16];
+	for each(LightNode* light in lights) {
+		mu.shadow_matrix(
+			mat,
+			plane,
+			light->position  // light position
+		);
 
-	//}
-	//
-	//glEnable(GL_DEPTH_TEST);
+	
+		mu.pushMatrix(gmu::MODEL);
+		mu.multMatrix(gmu::MODEL, mat);
+
+		for each(Node * child in head)
+		{
+			SceneGraph::InvDrawNode(child, true);
+		}
+		mu.popMatrix(gmu::MODEL);
+	}
+	
+	
+	glDisable(GL_POLYGON_OFFSET_FILL);
+	glDepthMask(GL_TRUE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//##########################
 	//Normal draw
-
-	//Lights
-	CalculateLights();
 
 	//part that is not drawn on stencil
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 	glStencilMask(0x00);
 
 	//draw scene
-	SceneGraph::DrawNode(floor[1]);
+	SceneGraph::DrawNode(floor[1], false);
 	for each(Node * child in head)
 	{
-		SceneGraph::DrawNode(child);
+		SceneGraph::DrawNode(child, false);
 	}
 	//transparent part last
 	//SceneGraph::DrawNode(floor[0]);
@@ -170,16 +171,16 @@ void SceneGraph::DrawScene() {
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
 	
 	//draw scene
-	SceneGraph::DrawNode(floor[1]);
+	SceneGraph::DrawNode(floor[1], false);
 	for each(Node * child in head)
 	{
-		SceneGraph::DrawNode(child);
+		SceneGraph::DrawNode(child, false);
 	}
 	//transparent part last
 	//SceneGraph::DrawNode(floor[0]);
 }
 
-void SceneGraph::DrawNode(Node* node) {
+void SceneGraph::DrawNode(Node* node, bool shadowMode) {
 	dataMesh data;
 
 	mu.pushMatrix(gmu::MODEL);
@@ -200,14 +201,19 @@ void SceneGraph::DrawNode(Node* node) {
 
 	for each(Node* child in node->GetChildren())
 	{
-		SceneGraph::DrawNode(child);
+		SceneGraph::DrawNode(child, shadowMode);
 	}
 
 	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
 	mu.computeNormalMatrix3x3();
 
 	data.meshID = node->meshId;
-	data.texMode = node->textureId;
+
+	if(!shadowMode)
+		data.texMode = node->textureId;
+	else
+		data.texMode = 0;
+
 	data.vm = mu.get(gmu::VIEW_MODEL);
 	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
 	data.normal = mu.getNormalMatrix();
@@ -232,7 +238,7 @@ void SceneGraph::DrawNode(Node* node) {
 	
 	mu.popMatrix(gmu::MODEL);
 }
-void SceneGraph::InvDrawNode(Node* node) {
+void SceneGraph::InvDrawNode(Node* node, bool shadowMode) {
 	dataMesh data;
 
 	mu.pushMatrix(gmu::MODEL);
@@ -257,14 +263,17 @@ void SceneGraph::InvDrawNode(Node* node) {
 
 	for each(Node * child in node->GetChildren())
 	{
-		SceneGraph::DrawNode(child);
+		SceneGraph::InvDrawNode(child, shadowMode);
 	}
 
 	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
 	mu.computeNormalMatrix3x3();
 
 	data.meshID = node->meshId;
-	data.texMode = node->textureId;
+	if (!shadowMode)
+		data.texMode = node->textureId;
+	else
+		data.texMode = 0;
 	data.vm = mu.get(gmu::VIEW_MODEL);
 	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
 	data.normal = mu.getNormalMatrix();

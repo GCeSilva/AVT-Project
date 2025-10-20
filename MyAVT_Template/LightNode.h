@@ -10,7 +10,6 @@ public:
 	virtual void CalculateLight(int* shaderArrayIndex) {};
 
 	int shaderArrayIndex;
-
 	float position[4];
 
 private:
@@ -28,6 +27,7 @@ public:
 		shaderArrayIndex = shaderArrayIndexCount;
 		shaderArrayIndexCount++;
 	}
+
 private:
 	Node* parent;
 	static int shaderArrayIndexCount;
@@ -36,6 +36,7 @@ private:
 class DirectionalLightNode : public LightNode {
 public:
 	void CalculateLight(int* shaderArrayIndex) override;
+
 
 	DirectionalLightNode(float pos[4]) {
 		memcpy(position, pos, sizeof(float) * 4);

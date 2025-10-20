@@ -44,14 +44,14 @@ public:
 	void AddFloor(int meshId, int textureId, Transform localTransform, int pos);
 
 	std::array<Node*, 2> GetFloor() { return floor; }
-	void SceneGraph::InvDrawNode(Node* node);
+	void SceneGraph::InvDrawNode(Node* node, bool shadowMode);
 
 	//LATER JUST MAKE AN ABSTRACTION SO THAT ADD NODE CAN ADD BOTH NODES
 	ObstacleNode* AddObstacle(int meshId, int textureId, Transform localTransform, std::array<float, 3> centre, Node* parent = nullptr);
 	
 	void DrawScene();
 	//do NOT use manualy, its called by another function
-	static void DrawNode(Node* node);
+	static void DrawNode(Node* noden, bool shadowMode);
 
 private:
 	std::list<Node*> head;

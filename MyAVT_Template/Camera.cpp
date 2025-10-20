@@ -152,7 +152,7 @@ void Camera::RenderRearView() {
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	glDepthMask(GL_FALSE);
 
-	SceneGraph::DrawNode(stencilShape);
+	SceneGraph::DrawNode(stencilShape, false);
 
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	glDepthMask(GL_TRUE);
