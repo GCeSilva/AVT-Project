@@ -139,6 +139,7 @@ bool Renderer::setRenderMeshesShaderProg(const std::string& vertShaderPath, cons
     glBindAttribLocation(program, Shader::VERTEX_COORD_ATTRIB, "position");
     glBindAttribLocation(program, Shader::NORMAL_ATTRIB, "normal");
     glBindAttribLocation(program, Shader::TEXTURE_COORD_ATTRIB, "texCoord");
+	glBindAttribLocation(program, Shader::TANGENT_ATTRIB, "tangent");
 
     glLinkProgram(program);
 
@@ -165,6 +166,7 @@ bool Renderer::setRenderMeshesShaderProg(const std::string& vertShaderPath, cons
 
     //billboard tree
     tex_loc[7] = glGetUniformLocation(program, "treeTex");
+	tex_loc[8] = glGetUniformLocation(program, "stoneNormalTex");
 
 
     return(shader.isProgramLinked() && shader.isProgramValid());
@@ -238,6 +240,14 @@ void Renderer::setFogMode(bool fogMode) {
     GLint loc;
     loc = glGetUniformLocation(program, "fogMode");
     if (fogMode)
+        glUniform1i(loc, 1);
+    else
+        glUniform1i(loc, 0);
+}
+void Renderer::setBumpMapMode(bool bumpMapMode) {
+    GLint loc;
+    loc = glGetUniformLocation(program, "bumpMapMode");
+    if (bumpMapMode)
         glUniform1i(loc, 1);
     else
         glUniform1i(loc, 0);

@@ -106,6 +106,7 @@ float cutOff[NUM_SPOT_LIGHTS] = { 0.93f, 0.93f };
 bool spotLightMode = true;
 
 bool fogMode = true;
+bool bumpMapMode = true;
 
 bool fontLoaded = false;
 
@@ -313,6 +314,7 @@ void renderSim(void) {
 	renderer.setTexUnit(6, 6);
 
 	renderer.setTexUnit(7, 7);
+	renderer.setTexUnit(8, 8);
 
 	// load identity matrices
 	sg.InitializeSceneGraph();
@@ -389,6 +391,8 @@ void processKeys(unsigned char key, int xx, int yy)
 	if (key == 'h') sg.spotLightMode = !sg.spotLightMode;
 
 	if (key == 'f') sg.fogMode = !sg.fogMode;
+
+	if (key == 'v') sg.bumpMapMode = !sg.bumpMapMode;
 
 
 	// up and own keys
@@ -595,6 +599,8 @@ void buildScene()
 
 	renderer.TexObjArray.texture2D_Loader("assets/tree.png");
 
+	renderer.TexObjArray.texture2D_Loader("assets/normal.tga");
+
 
 	//Scene geometry with triangle meshes
 
@@ -712,6 +718,7 @@ void buildScene()
 	sg.spotLightMode = spotLightMode;
 	// fog
 	sg.fogMode = fogMode;
+	sg.bumpMapMode = bumpMapMode;
 
 	for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
 		sg.AddLight(new PointLightNode(pointLightPos[i]));

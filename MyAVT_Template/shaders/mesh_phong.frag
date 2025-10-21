@@ -15,7 +15,9 @@ struct Materials {
 in Data {
 	vec3 normal;
 	vec3 eye;
+	vec3 eye_default;
 	vec2 tex_coord;
+	vec3 dirLight;
 	vec3 pointLights[NUMBER_POINT_LIGHTS];
 	vec3 spotLights[NUMBER_SPOT_LIGHTS];
 } DataIn;
@@ -33,8 +35,8 @@ uniform sampler2D specularTex;
 uniform sampler2D normalTex;
 //tree sprite
 uniform sampler2D treeTex;
-
-uniform vec4 dirLight;
+// stone normal
+uniform sampler2D stoneNormalTex;
 
 uniform int texMode;
 
@@ -46,10 +48,12 @@ uniform bool pointLightMode;
 uniform bool spotLightsOn;
 uniform bool dirLightMode;
 uniform bool fogMode;
+uniform bool bumpMapMode;
 
 out vec4 colorOut;
 
 void main() {
+
 	vec4 texel, texel1, texelDif, texelSpec, texelNorm, texelTree;
 
 	vec4 spec = vec4(0.0);
@@ -62,14 +66,18 @@ void main() {
 	float att = 0.0;
 	float spotExp = 60.0;
 
-	vec3 n = normalize(DataIn.normal);
+	vec3 n;
+	if(texMode == 2 && bumpMapMode)  // lookup normal from normal map, move from [0,1] to [-1, 1] range, normalize
+		n = normalize(2.0 * texture(stoneNormalTex, DataIn.tex_coord).rgb - 1.0);
+	else
+		n = normalize(DataIn.normal);
 	vec3 e = normalize(DataIn.eye);
 
 	if(dirLightMode){
-		intensity = max(dot(n, dirLight.xyz), 0.0);
+		intensity = max(dot(n, DataIn.dirLight), 0.0);
 
 		if (intensity > 0.0) {
-			vec3 h = normalize(dirLight.xyz + e);
+			vec3 h = normalize(DataIn.dirLight + e);
 			intSpec = max(dot(h,n), 0.0);
 			spec = mat.specular * pow(intSpec, mat.shininess);
 		}
@@ -119,6 +127,7 @@ void main() {
 			}
 		}
 	}
+	
 
 	vec4 color = vec4(0.0);
 
@@ -164,7 +173,7 @@ void main() {
 	}
 	
 	if(fogMode){
-		float dist = length(-DataIn.eye);
+		float dist = length(-DataIn.eye_default);
 		float fogAmount = exp(-dist*0.02);
 		vec3 fogColor = vec3(0.5,0.6,0.7);
 		color = vec4(mix(fogColor, color.rgb, fogAmount), mat.diffuse.a);
