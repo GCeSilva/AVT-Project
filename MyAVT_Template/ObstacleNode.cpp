@@ -30,9 +30,11 @@ bool ObstacleNode::CheckDistanceFromMoveArea() {
 
 bool ObstacleNode::CollisionBehaviour(Node* other){
 
-	other->localTransform.translation = new vec3{ 0.0f, 3.0f, 0.0f };
+	//not needed anymore
 
-	other->localTransform.rotation = new vec3{0.0f, 0.0f, 0.0f};
+	//other->localTransform.translation = new vec3{ 0.0f, 3.0f, 0.0f };
+
+	//other->localTransform.rotation = new vec3{0.0f, 0.0f, 0.0f};
 
 	//so it doesnt roll back the movement before the teleport
 	return false;

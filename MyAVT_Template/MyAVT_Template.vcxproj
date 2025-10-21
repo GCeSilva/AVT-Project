@@ -166,6 +166,7 @@
     <ClCompile Include="lightDemo.cpp" />
     <ClCompile Include="LightNode.cpp" />
     <ClCompile Include="mathUtility.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="ObstacleNode.cpp" />
     <ClCompile Include="Prefabs.cpp" />
     <ClCompile Include="renderer.cpp" />

@@ -6,11 +6,15 @@
 
 class Node {
 public:
+	unsigned int id;
 	int meshId;
 	int textureId;
 	Transform localTransform;
 	BoundingBox* boundingBox = nullptr;
 
+	bool operator==(const Node& other) const {
+		return this->id == other.id;
+	}
 
 	Node(int meshId, int textureID, Transform localTransform, Node* parent = nullptr)
 	{
@@ -30,6 +34,8 @@ public:
 		}
 
 		this->boundingBox = new BoundingBox{ this };
+		id = idCounter;
+		idCounter++;
 	}
 
 	virtual bool CollisionBehaviour(Node* other) { return true; }
@@ -55,6 +61,7 @@ protected:
 	bool hasSubMeshes = false;
 
 private:
+	static unsigned int idCounter;
 	Node* parent;
 	std::list<Node*> children = {};
 

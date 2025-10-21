@@ -14,9 +14,11 @@
 
 #include <math.h>
 #include <iostream>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <random>
 
 // include GLEW to access OpenGL 3.3 functions
 #include <GL/glew.h>
@@ -81,7 +83,7 @@ char s[32];
 //lights
 // probably at some point remove this from here and put it on its own file or something
 float directionalLightPos[4] = { 1000.0f, 1000.0f, 1.0f, 0.0f };
-bool directionalLightMode = true;
+bool directionalLightMode = false;
 
 float pointLightPos[NUM_POINT_LIGHTS][4] = {
 	{  5.0f,  10.0f,   5.0f, 1.0f },
@@ -91,7 +93,7 @@ float pointLightPos[NUM_POINT_LIGHTS][4] = {
 	{  0.0f,  10.0f,   0.0f, 1.0f },
 	{  5.0f,  10.0f,   0.0f, 1.0f }
 };
-bool pointLightMode = true;
+bool pointLightMode = false;
 
 //Spotlight
 float spotLightPos[NUM_SPOT_LIGHTS][4] = {
@@ -103,7 +105,7 @@ float coneDir[NUM_SPOT_LIGHTS][4] = {
 	{ 0.0f, -0.0f, -1.0f, 0.0f }
 };
 float cutOff[NUM_SPOT_LIGHTS] = { 0.93f, 0.93f };
-bool spotLightMode = true;
+bool spotLightMode = false;
 
 bool fogMode = true;
 bool bumpMapMode = true;
@@ -126,6 +128,72 @@ void changeSize(int w, int h) {
 // Render stufff
 //
 
+std::array<unsigned int, 2> buildingBounds = { 4, 403 };
+Node* startBuilding;
+Node* goalBuilding;
+AssimpNode* backpackBuilding;
+
+float itemOffset = 0.5f;
+bool droneCarry = false;
+
+float score = 0.0f;
+float maxFuel = 100.0f;
+float droneFuel = 100.0f;
+float consumption = 0.75f;
+float collisionFuelLossPercent = 0.25f;
+float immuneTimeAfterCollision = 1.0f;
+float immuneTimer = 1.0f;
+
+Node* randomBuilding() {
+	int n = (rand() % (buildingBounds[1] - buildingBounds[0])) + buildingBounds[0];
+
+	std::list<Node*> sgList = sg.GetGraph();
+
+	auto it = std::find_if(sgList.begin(), sgList.end(), [n](Node* node) {
+		return node != nullptr && node->id == static_cast<unsigned int>(n);
+		});
+
+	if (it == sgList.end()) {
+		std::cout << "Random building not found: " << n << std::endl;
+		return nullptr;
+	}
+
+	return *it;
+
+}
+
+void setUpRound() {
+
+	startBuilding = randomBuilding();
+	goalBuilding = randomBuilding();
+
+	while (startBuilding->id == goalBuilding->id)
+		goalBuilding = randomBuilding();
+
+	std::cout << "Start building ID: " << startBuilding->id << std::endl;
+	std::cout << "Goal building ID: " << goalBuilding->id << std::endl;
+
+	backpackBuilding = sg.AddAssimpNode(BACKPACK, assimpMeshMap[BACKPACK], 4, Transform{
+		new vec3{
+			(*startBuilding->localTransform.translation)[0],
+			0.5f * (*objectTransforms[BUILDING].scale)[1] + (*startBuilding->localTransform.translation)[1] + 0.5f + itemOffset,
+			(*startBuilding->localTransform.translation)[2],
+		},
+		new vec3{1.0f, 1.0f, 1.0f},
+		new vec3{ 0.0f, 0.0f, 0.0f },
+		}
+		);
+
+	goalBuilding->textureId = 0;
+}
+
+void initGame() {
+
+	std::srand(std::time(nullptr));
+
+	setUpRound();
+}
+
 // forward anim vars
 float animSpeed = 0.1f;
 float tiltAngle = -(15.0f * (PI / 180.0f));
@@ -142,6 +210,17 @@ bool animations() {
 			new vec3{ 0.0f, 5.0f, 0.0f }
 			});
 	}
+
+
+	//backpack is too complicated to be animated
+	/*if(backpackBuilding != nullptr) {
+		backpackBuilding->UpdateLocalTransform(Transform{
+			nullptr,
+			nullptr,
+			new vec3{ 0.0f, 5.0f, 0.0f }
+			});
+	}*/
+
 	//tree sprite billboarding
 	float tempRot[3];
 	tempRot[0] = camera->radious * sin(camera->localRotation[2] * 3.14f / 180.0f + (*camera->GetParent()->localTransform.rotation)[1]) * cos(camera->localRotation[0] * 3.14f / 180.0f);
@@ -160,6 +239,10 @@ bool animations() {
 	};
 
 	//#######################
+
+	if(droneFuel <= 0.0f)
+		return false;
+
 	float transformCheck = 0.0f;
 
 	if (speedKeys[0] != 0 || speedKeys[1] != 0) {
@@ -202,12 +285,73 @@ bool animations() {
 	return false;
 }
 
+bool backpackCollected() {
+	droneCarry = true;
+	sg.RemoveNode(backpackBuilding);
+	backpackBuilding = nullptr;
+	return false;
+}
+bool backpackDelivered() {
+	droneCarry = false;
+	goalBuilding->textureId = 2;
+
+	score += (droneFuel * 2.0f);
+
+	//std::cout << "Score: " << score << std::endl;
+
+	droneFuel = maxFuel;
+
+	setUpRound();
+
+	return true;
+}
+
+void resetGame() {
+	droneFuel = maxFuel;
+
+	//std::cout << "Final Score: " << score << std::endl;
+
+	score = 0.0f;
+	immuneTimer = immuneTimeAfterCollision;
+
+	if (backpackBuilding != nullptr) {
+		sg.RemoveNode(backpackBuilding);
+		backpackBuilding = nullptr;
+	}
+	droneCarry = false;
+
+	goalBuilding->textureId = 2;
+
+	setUpRound();
+
+	drone->localTransform.translation = new vec3{ 0.0f, 3.0f, 0.0f };
+	drone->localTransform.rotation = new vec3{ 0.0f, 0.0f, 0.0f };
+
+}
+
 bool droneCollisionCheck() {
 	for each(Node* node in sg.GetGraph())
 	{
 		if (node == drone) continue;
-		if (drone->boundingBox->CheckCollision(node->boundingBox))
-			return node->CollisionBehaviour(drone);
+
+		if (drone->boundingBox->CheckCollision(node->boundingBox)) {
+
+			if (backpackBuilding != nullptr && node->id == backpackBuilding->id)
+				return backpackCollected();
+
+			else if (node->id == goalBuilding->id && droneCarry) {
+				immuneTimer = 0.0f;
+				return backpackDelivered();
+			}
+
+			else {
+				if (immuneTimer >= immuneTimeAfterCollision) {
+					droneFuel -= (maxFuel * collisionFuelLossPercent);
+					immuneTimer = 0.0f;
+				}
+				return node->CollisionBehaviour(drone);
+			}
+		}
 	}
 	for each(Node* node in sg.GetFloor())
 	{
@@ -215,6 +359,31 @@ bool droneCollisionCheck() {
 			return node->CollisionBehaviour(drone);
 	}
 	return false;
+}
+
+void gameOver() {
+	drone->UpdateLocalTransform(Transform{
+		new vec3{
+			0.0f,
+			-0.1f,
+			0.0f
+		},
+		nullptr,
+		nullptr
+		}
+	);
+	if (droneCollisionCheck()) {
+		drone->UpdateLocalTransform(Transform{
+			new vec3{
+					0.0f,
+					0.1f,
+					0.0f
+				},
+				nullptr,
+				nullptr
+			}
+		);
+	}
 }
 
 float currentUp = 0.0f;
@@ -298,6 +467,14 @@ void obstacleBehaviour() {
 void renderSim(void) {
 
 	FrameCount++;
+
+	if (droneFuel > 0.0f)
+		droneFuel -= (consumption + (consumption + 0.1f) * (*drone->localTransform.translation)[1]) / 60.0f; // fuel consumption per second
+
+	if (immuneTimer < immuneTimeAfterCollision)
+		immuneTimer += 1.0f / 60.0f;
+	//cout << "Drone Fuel: " << droneFuel << "%" << endl;
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	renderer.activateRenderMeshesShaderProg(); // use the required GLSL program to draw the meshes with illumination
@@ -323,7 +500,11 @@ void renderSim(void) {
 
 	bool ani = animations();
 	
-	applyKeys(ani);
+	if (droneFuel > 0.0f)
+		applyKeys(ani);
+	else
+		gameOver();
+
 
 	sg.DrawScene();
 
@@ -358,6 +539,7 @@ void renderSim(void) {
 	*/
 	glutSwapBuffers();
 }
+
 // ------------------------------------------------------------
 //
 // Events from the Keyboard
@@ -417,11 +599,7 @@ void processKeys(unsigned char key, int xx, int yy)
 	if (key == 'b') glDisable(GL_MULTISAMPLE);
 
 	if (key == 'r') { //reset
-		alpha = 57.0f; beta = 18.0f;  // Camera Spherical Coordinates
-		r = 5.0f;
-		camera->radious = r = 5.0f;
-		camera->localRotation[2] = alpha = -90.0f;
-		camera->localRotation[0] = beta = 18.0f;
+		resetGame();
 	}
 }
 void SpecialInputUp(int key, int x, int y) {
@@ -639,15 +817,9 @@ void buildScene()
 
 
 	//Assimp asset import
-	//AssimpImport("assets/backpack/backpack.obj", BACKPACK);
-	AssimpImport("assets/drone/Drone.fbx", COTTAGE);
-
-	/*sg.AddAssimpNode(BACKPACK, assimpMeshMap[BACKPACK], 4, Transform{
-		new vec3{ 5.0f, 1.0f, 0.0f },
-		new vec3{ 1.0f, 1.0f, 1.0f },
-		new vec3{ 0.0f, 0.0f, 180.0f }
-	});
-	*/
+	AssimpImport("assets/backpack/backpack.obj", BACKPACK);
+	//AssimpImport("assets/drone/Drone.fbx", COTTAGE);
+	
 	/*sg.AddAssimpNode(COTTAGE, assimpMeshMap[COTTAGE], 1, Transform{
 		new vec3{ 0.0f, 1.0f ,0.0f},
 		new vec3{ 1.0f, 1.0f ,1.0f},
@@ -710,7 +882,7 @@ void buildScene()
 	}
 	
 	//BigBall
-	sg.AddNode(SPHERE, 2, objectTransforms[BIGBALL]);
+	//sg.AddNode(SPHERE, 2, objectTransforms[BIGBALL]);
 	
 	//lights
 	sg.directionalLightMode = directionalLightMode;
@@ -753,6 +925,8 @@ void buildScene()
 		cerr << "Fonts loaded\n";
 
 	printf("\nNumber of Texture Objects is %d\n\n", renderer.TexObjArray.getNumTextureObjects());
+	
+	initGame();
 }
 
 /// ::::::::::::::::::::::::::::::::::::::::::::::::CALLBACK FUNCIONS:::::::::::::::::::::::::::::::::::::::::::::::::://///
