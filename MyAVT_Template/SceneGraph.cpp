@@ -124,6 +124,17 @@ void SceneGraph::DrawScene() {
 
 	float mat[16];
 	for each(LightNode* light in lights) {
+
+		//skip non active light types
+		if(light->GetType() == "PointLight" && !pointLightMode)
+			continue;
+		else if(light->GetType() == "SpotLight" && !spotLightMode)
+			continue;
+		else if(light->GetType() == "DirectionalLight" && !directionalLightMode)
+			continue;
+
+		//spotlight does not work, probably since it uses diferent logic from every other light
+		//need to ask later about it
 		mu.shadow_matrix(
 			mat,
 			plane,

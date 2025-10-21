@@ -87,3 +87,31 @@ void SpotLightNode::CalculateLight(int* shaderArrayIndex) {
 			renderer.setSpotParam(&coneDirection, cutOff, shaderArrayIndex);
 		}	
 }
+
+float* SpotLightNode::GetPosition(){
+	float res[4];
+
+	float tempAxisRot[3] = {};
+
+	//full parent inheritance
+	Node* tempParent = parent;
+	while (tempParent != nullptr) {
+
+		tempAxisRot[0] = (*tempParent->localTransform.rotation)[0];
+		tempAxisRot[1] = (*tempParent->localTransform.rotation)[1];
+		tempAxisRot[2] = (*tempParent->localTransform.rotation)[2];
+
+		tempParent = tempParent->GetParent();
+	}
+
+	//x
+	res[0] = coneDirection[0] + cos(-tempAxisRot[1]) / (PI / 180.0f);
+	//y
+	res[1] = coneDirection[1] + sin(tempAxisRot[2]) / (PI / 180.0f);
+	//z
+	res[2] = coneDirection[2] + sin(-tempAxisRot[1]) / (PI / 180.0f);
+	//not used
+	res[3] = coneDirection[3];
+
+	return res;
+}

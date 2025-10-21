@@ -8,6 +8,8 @@ extern Renderer renderer;
 class LightNode {
 public:
 	virtual void CalculateLight(int* shaderArrayIndex) {};
+	virtual std::string GetType() { return "LightNode"; }
+	virtual float* GetPosition() { return position; }
 
 	int shaderArrayIndex;
 	float position[4];
@@ -19,6 +21,7 @@ private:
 class PointLightNode : public LightNode {
 public:
 	void CalculateLight(int* shaderArrayIndex) override;
+	std::string GetType() override { return "PointLight"; }
 
 	PointLightNode(float pos[4], Node* parent = nullptr) {
 		memcpy(position, pos, sizeof(float) * 4);
@@ -36,6 +39,7 @@ private:
 class DirectionalLightNode : public LightNode {
 public:
 	void CalculateLight(int* shaderArrayIndex) override;
+	std::string GetType() override { return "DirectionalLight"; }
 
 
 	DirectionalLightNode(float pos[4]) {
@@ -46,6 +50,7 @@ public:
 class SpotLightNode : public LightNode {
 public:
 	void CalculateLight(int* shaderArrayIndex) override;
+	std::string GetType() override { return "SpotLight"; }
 
 	SpotLightNode(float pos[4], float coneDir[4], float cutOff, Node* parent = nullptr) {
 
@@ -60,6 +65,8 @@ public:
 		shaderArrayIndex = shaderArrayIndexCount;
 		shaderArrayIndexCount++;
 	}
+
+	float* GetPosition() override;
 
 private:
 	Node* parent;
