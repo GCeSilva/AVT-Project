@@ -139,41 +139,58 @@ bool Renderer::setRenderMeshesShaderProg(const std::string& vertShaderPath, cons
     glBindAttribLocation(program, Shader::VERTEX_COORD_ATTRIB, "position");
     glBindAttribLocation(program, Shader::NORMAL_ATTRIB, "normal");
     glBindAttribLocation(program, Shader::TEXTURE_COORD_ATTRIB, "texCoord");
-	glBindAttribLocation(program, Shader::TANGENT_ATTRIB, "tangent");
+    glBindAttribLocation(program, Shader::TANGENT_ATTRIB, "tangent");
 
     glLinkProgram(program);
 
-    printf("InfoLog for Model Shaders and Program\n%s\n\n", shader.getAllInfoLogs().c_str());
-    if (!shader.isProgramValid())
-        printf("GLSL Model Program Not Valid!\n");
+    // CHECK LINKING FIRST
+    if (!shader.isProgramLinked()) {
+        printf("GLSL Model Program failed to link!\n");
+        printf("InfoLog:\n%s\n\n", shader.getAllInfoLogs().c_str());
+        return false;
+    }
 
-    pvm_loc     = glGetUniformLocation(program, "m_pvm");
-    vm_loc      = glGetUniformLocation(program, "m_viewModel");
-	m_loc       = glGetUniformLocation(program, "m_model");
-    normal_loc  = glGetUniformLocation(program, "m_normal");
-    texMode_loc = glGetUniformLocation(program, "texMode");     // different modes of texturing
+    // ACTIVATE PROGRAM BEFORE SETTING UNIFORMS
+    glUseProgram(program);
+
+    pvm_loc = glGetUniformLocation(program, "m_pvm");
+    vm_loc = glGetUniformLocation(program, "m_viewModel");
+    m_loc = glGetUniformLocation(program, "m_model");
+    normal_loc = glGetUniformLocation(program, "m_normal");
+    texMode_loc = glGetUniformLocation(program, "texMode");
 
     lpos_loc = glGetUniformLocation(program, "l_pos");
 
-    tex_loc[0] = glGetUniformLocation(program, "texmap" );
+    tex_loc[0] = glGetUniformLocation(program, "texmap");
     tex_loc[1] = glGetUniformLocation(program, "texmap1");
     tex_loc[2] = glGetUniformLocation(program, "texmap2");
     tex_loc[3] = glGetUniformLocation(program, "texmap3");
-    
-    //for assimp
+
     tex_loc[4] = glGetUniformLocation(program, "diffuseTex");
     tex_loc[5] = glGetUniformLocation(program, "specularTex");
     tex_loc[6] = glGetUniformLocation(program, "normalTex");
 
-    //billboard tree
     tex_loc[7] = glGetUniformLocation(program, "treeTex");
-	
-	// bump map stone
     tex_loc[8] = glGetUniformLocation(program, "stoneNormalTex");
+    tex_loc[9] = glGetUniformLocation(program, "cubeMap");
 
-	// cube map
-	tex_loc[9] = glGetUniformLocation(program, "cubeMap");
+    // BIND ALL TEXTURE SAMPLERS TO THEIR RESPECTIVE TEXTURE UNITS
+    // This is critical for validation to pass on non-NVIDIA GPUs
+    glUniform1i(tex_loc[0], 0);
+    glUniform1i(tex_loc[1], 1);
+    glUniform1i(tex_loc[2], 2);
+    glUniform1i(tex_loc[3], 3);
+    glUniform1i(tex_loc[4], 4);
+    glUniform1i(tex_loc[5], 5);
+    glUniform1i(tex_loc[6], 6);
+    glUniform1i(tex_loc[7], 7);
+    glUniform1i(tex_loc[8], 8);
+    glUniform1i(tex_loc[9], 9);  // Cube map at texture unit 9
 
+    // NOW validate
+    printf("InfoLog for Model Shaders and Program\n%s\n\n", shader.getAllInfoLogs().c_str());
+    if (!shader.isProgramValid())
+        printf("GLSL Model Program Not Valid!\n");
 
     return(shader.isProgramLinked() && shader.isProgramValid());
 }
