@@ -25,6 +25,7 @@ public:
 		Node* parent;
 	};
 
+	bool fontLoaded;
 	bool spotLightMode;
 	bool pointLightMode;
 	bool directionalLightMode;

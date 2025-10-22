@@ -195,7 +195,7 @@ void SceneGraph::DrawScene() {
 
 	//stencil bit
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
-	
+
 	//##########################
 	// skybox
 	glDepthMask(GL_FALSE);
@@ -212,6 +212,33 @@ void SceneGraph::DrawScene() {
 	{
 		SceneGraph::DrawNode(child, false);
 	}
+
+	if (fontLoaded) {
+		glDisable(GL_STENCIL_TEST);
+		glDisable(GL_DEPTH_TEST);
+		TextCommand textCmd = { "AVT 2025 Welcome:\nGood Luck!", {100, 200}, 0.5 };
+		//the glyph contains transparent background colors and non-transparent for the actual character pixels. So we use the blending
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		int m_viewport[4];
+		glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+		//viewer at origin looking down at  negative z direction
+
+		mu.loadIdentity(gmu::MODEL);
+		mu.loadIdentity(gmu::VIEW);
+		mu.pushMatrix(gmu::PROJECTION);
+		mu.loadIdentity(gmu::PROJECTION);
+		mu.ortho(m_viewport[0], m_viewport[0] + m_viewport[2] - 1, m_viewport[1], m_viewport[1] + m_viewport[3] - 1, -1, 1);
+		mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
+		textCmd.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
+		renderer.renderText(textCmd);
+		mu.popMatrix(gmu::PROJECTION);
+		glDisable(GL_BLEND);
+		glEnable(GL_STENCIL_TEST);
+		glEnable(GL_DEPTH_TEST);
+	}
+
 	//transparent part last
 	//SceneGraph::DrawNode(floor[0]);
 }
