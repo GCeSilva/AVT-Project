@@ -120,7 +120,6 @@ const char* cubeMapFilenames[] = {
 bool fogMode = true;
 bool bumpMapMode = true;
 bool paused = false;
-bool fontLoaded = false;
 
 // ------------------------------------------------------------
 //
@@ -147,12 +146,17 @@ float itemOffset = 0.5f;
 bool droneCarry = false;
 
 float score = 0.0f;
-float maxFuel = 100.0f;
 float droneFuel = 100.0f;
+float totalDistanceFlown = 0.0f;
+
+float maxFuel = 100.0f;
 float consumption = 0.75f;
 float collisionFuelLossPercent = 0.25f;
+
 float immuneTimeAfterCollision = 1.0f;
 float immuneTimer = 1.0f;
+
+bool isGameOver = false;
 
 Node* randomBuilding() {
 	int n = (rand() % (buildingBounds[1] - buildingBounds[0])) + buildingBounds[0];
@@ -316,29 +320,6 @@ bool backpackDelivered() {
 	return true;
 }
 
-void resetGame() {
-	droneFuel = maxFuel;
-
-	//std::cout << "Final Score: " << score << std::endl;
-
-	score = 0.0f;
-	immuneTimer = immuneTimeAfterCollision;
-
-	if (backpackBuilding != nullptr) {
-		sg.RemoveNode(backpackBuilding);
-		backpackBuilding = nullptr;
-	}
-	droneCarry = false;
-
-	goalBuilding->textureId = 2;
-
-	setUpRound();
-
-	drone->localTransform.translation = new vec3{ 0.0f, 3.0f, 0.0f };
-	drone->localTransform.rotation = new vec3{ 0.0f, 0.0f, 0.0f };
-
-}
-
 bool droneCollisionCheck() {
 	for each(Node* node in sg.GetGraph())
 	{
@@ -372,10 +353,14 @@ bool droneCollisionCheck() {
 }
 
 void gameOver() {
+
+	if(!isGameOver)
+		isGameOver = true;
+
 	drone->UpdateLocalTransform(Transform{
 		new vec3{
 			0.0f,
-			-0.1f,
+			-0.5f,
 			0.0f
 		},
 		nullptr,
@@ -386,7 +371,7 @@ void gameOver() {
 		drone->UpdateLocalTransform(Transform{
 			new vec3{
 					0.0f,
-					0.1f,
+					0.5f,
 					0.0f
 				},
 				nullptr,
@@ -399,6 +384,34 @@ void gameOver() {
 float currentUp = 0.0f;
 float currentSide = 0.0f;
 float currentSpeed = 0.0f;
+
+void resetGame() {
+	droneFuel = maxFuel;
+
+	currentSide = 0.0f;
+	currentUp = 0.0f;
+	currentSpeed = 0.0f;
+
+	score = 0.0f;
+	totalDistanceFlown = 0.0f;
+	immuneTimer = immuneTimeAfterCollision;
+
+	if (backpackBuilding != nullptr) {
+		sg.RemoveNode(backpackBuilding);
+		backpackBuilding = nullptr;
+	}
+
+	droneCarry = false;
+	isGameOver = false;
+
+	goalBuilding->textureId = 2;
+
+	setUpRound();
+
+	drone->localTransform.translation = new vec3{ 0.0f, 3.0f, 0.0f };
+	drone->localTransform.rotation = new vec3{ 0.0f, 0.0f, 0.0f };
+
+}
 
 void applyKeys(bool ani) {
 	// key input output
@@ -425,14 +438,22 @@ void applyKeys(bool ani) {
 	currentUp = abs(currentUp) <= THRESHOLD ? 0.0f : currentUp;
 	currentSide = abs(currentSide) <= THRESHOLD ? 0.0f : currentSide;
 
+	float movX = currentSpeed * cos(-(*drone->localTransform.rotation)[1]) + currentSide * sin((*drone->localTransform.rotation)[1]);
+	float movZ = currentSpeed * sin(-(*drone->localTransform.rotation)[1]) + currentSide * cos((*drone->localTransform.rotation)[1]);
+	float movY = currentUp;
+
+	float totalMov = sqrt(movX * movX + movY * movY + movZ * movZ);
+
+	totalDistanceFlown += totalMov;
+
 	//bounds updated every frame now i guess
 	drone->UpdateLocalTransform(Transform{
 			new vec3{
 			// this is using radians, since later the rotate is also in radians
 			// need to think why it needs to be negative
-				currentSpeed * cos(-(*drone->localTransform.rotation)[1]) + currentSide * sin((*drone->localTransform.rotation)[1]),
-				currentUp,
-				currentSpeed * sin(-(*drone->localTransform.rotation)[1]) + currentSide * cos((*drone->localTransform.rotation)[1])
+				movX,
+				movY,
+				movZ
 			},
 			nullptr,
 			new vec3{ 0.0f, tempAngle, 0.0f }
@@ -440,13 +461,16 @@ void applyKeys(bool ani) {
 	);
 	
 	if (droneCollisionCheck()) {
+
+		totalDistanceFlown -= totalMov;
+
 		drone->UpdateLocalTransform(Transform{
 			new vec3{
 				// this is using radians, since later the rotate is also in radians
 				// need to think why it needs to be negative
-					-(currentSpeed * cos(-(*drone->localTransform.rotation)[1]) + currentSide * sin((*drone->localTransform.rotation)[1])),
-					-currentUp,
-					-(currentSpeed * sin(-(*drone->localTransform.rotation)[1]) + currentSide * cos((*drone->localTransform.rotation)[1]))
+					-movX,
+					-movY,
+					-movZ
 				},
 				nullptr,
 				new vec3{ 0.0f, -tempAngle, 0.0f }
@@ -559,12 +583,20 @@ void renderSim(void) {
 	
 	if (sg.fontLoaded) {
 		
+		//all trial and error
 		if(paused)
-			//all trial and error
 			printTextOnScreen("** PAUSED **", 665.0f/2.0f, 950.0f/2.0f, 0.75f);
+		if (isGameOver) {
+			printTextOnScreen("=== GAME OVER ===", 500.0f / 2.0f, 950.0f / 2.0f, 0.75f);
+			printTextOnScreen("Press 'R' to Restart", 750.0f / 2.0f, 1225.0f / 2.0f, 0.5f);
+		}
 
 		printTextOnScreen("Fuel: " + to_string((int)droneFuel) + "%", 100, 200, 0.5f);
-		printTextOnScreen("Score: " + to_string((int)score), 97, 125, 0.5f);
+
+		printTextOnScreen("Distance Flown: " + to_string((int)totalDistanceFlown) + " units", 100, 125, 0.5f);
+
+		printTextOnScreen("Score: " + to_string((int)score), 100, 50, 0.5f);
+
 	}
 	glutSwapBuffers();
 }
@@ -647,11 +679,8 @@ void processKeys(unsigned char key, int xx, int yy)
 	if (key == 'b') glDisable(GL_MULTISAMPLE);
 
 	if (key == 'p') {
-		paused = !paused;
-		if (!paused) {
-			// Start refresh loop immediately, refresh will reschedule itself
-			glutTimerFunc(0, refresh, 0);
-		}
+		if(!isGameOver)
+			paused = !paused;
 	}
 
 	if (key == 'r') { //reset
