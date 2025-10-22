@@ -119,6 +119,8 @@ const char* cubeMapFilenames[] = {
 
 bool fogMode = true;
 bool bumpMapMode = true;
+bool paused = false;
+bool fontLoaded = false;
 
 // ------------------------------------------------------------
 //
@@ -507,15 +509,18 @@ void renderSim(void) {
 
 	// load identity matrices
 	sg.InitializeSceneGraph();
-
-	obstacleBehaviour();
-
-	bool ani = animations();
 	
-	if (droneFuel > 0.0f)
-		applyKeys(ani);
-	else
-		gameOver();
+	// Only advance simulation when not paused
+	if (!paused) {
+		obstacleBehaviour();
+
+		bool ani = animations();
+
+		if (droneFuel > 0.0f)
+			applyKeys(ani);
+		else
+			gameOver();
+	} // skips updates so external events (mouse click, redisplay) can't affect simulation when paused
 
 	sg.DrawScene();
 	
@@ -523,7 +528,60 @@ void renderSim(void) {
 	//Each glyph quad texture needs just one byte color channel: 0 in background and 1 for the actual character pixels. Use it for alpha blending
 	//text to be rendered in last place to be in front of everything
 	
+	if (fontLoaded && paused) {
+		glDisable(GL_DEPTH_TEST);
+
+		//the glyph contains transparent background colors and non-transparent for the actual character pixels. So we use the blending
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		int m_viewport[4];
+		glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+		//viewer at origin looking down at negative z direction
+
+		mu.loadIdentity(gmu::MODEL);
+		mu.loadIdentity(gmu::VIEW);
+		mu.pushMatrix(gmu::PROJECTION);
+		mu.loadIdentity(gmu::PROJECTION);
+
+		mu.ortho(m_viewport[0], m_viewport[0] + m_viewport[2] - 1, m_viewport[1], m_viewport[1] + m_viewport[3] - 1, -1, 1);
+
+		mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
+
+		TextCommand textCmd = { "PAUSED", {50.0f, 50.0f} };	// y dis not shown????
+		textCmd.pvm = mu.get(gmu::PROJ_VIEW_MODEL);			// appeared once in rear view mirror, but never again ?!?!?
+
+		renderer.renderText(textCmd);
+
+		mu.popMatrix(gmu::PROJECTION);
+
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+
+	}
 	glutSwapBuffers();
+}
+
+/// ::::::::::::::::::::::::::::::::::::::::::::::::CALLBACK FUNCIONS::::::::::::::::::::::::::::::::::::::::::::::::::///// needs to be here for some pause key down
+
+void timer(int value)
+{
+	std::ostringstream oss;
+	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")";
+	std::string s = oss.str();
+	glutSetWindow(WindowHandle);
+	glutSetWindowTitle(s.c_str());
+	FrameCount = 0;
+	glutTimerFunc(1000, timer, 0); //ms, chama a funcao timer, valor irrelevante
+}
+
+void refresh(int value)
+{
+	if (!paused) {
+		renderSim();
+		glutTimerFunc(1000 / 60, refresh, 0);
+	}
 }
 
 // ------------------------------------------------------------
@@ -584,6 +642,14 @@ void processKeys(unsigned char key, int xx, int yy)
 
 	if (key == 'b') glDisable(GL_MULTISAMPLE);
 
+	if (key == 'p') {
+		paused = !paused;
+		if (!paused) {
+			// Start refresh loop immediately, refresh will reschedule itself
+			glutTimerFunc(0, refresh, 0);
+		}
+	}
+
 	if (key == 'r') { //reset
 		resetGame();
 	}
@@ -623,7 +689,7 @@ void processKeysUp(unsigned char key, int xx, int yy)
 void processMouseButtons(int button, int state, int xx, int yy)
 {
 	// no touch-i when not correct state
-	if (camera->currentState != Camera::FollowPlayerPersp) return;
+	if (camera->currentState != Camera::FollowPlayerPersp || paused) return;
 
 	// start tracking the mouse
 	if (state == GLUT_DOWN)  {
@@ -655,7 +721,7 @@ void processMouseButtons(int button, int state, int xx, int yy)
 void processMouseMotion(int xx, int yy)
 {
 	// no touch-i when not correct state
-	if (camera->currentState != Camera::FollowPlayerPersp) return;
+	if (camera->currentState != Camera::FollowPlayerPersp || paused) return;
 
 	int deltaX, deltaY;
 	float alphaAux, betaAux;
@@ -698,7 +764,7 @@ void processMouseMotion(int xx, int yy)
 
 void mouseWheel(int wheel, int direction, int x, int y) {
 	// no touch-i when not correct state
-	if (camera->currentState != Camera::FollowPlayerPersp) return;
+	if (camera->currentState != Camera::FollowPlayerPersp || paused) return;
 
 	r -= direction * 1.0f;
 	if (r < 0.1f)
@@ -923,24 +989,6 @@ void buildScene()
 	initGame();
 }
 
-/// ::::::::::::::::::::::::::::::::::::::::::::::::CALLBACK FUNCIONS:::::::::::::::::::::::::::::::::::::::::::::::::://///
-
-void timer(int value)
-{
-	std::ostringstream oss;
-	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")";
-	std::string s = oss.str();
-	glutSetWindow(WindowHandle);
-	glutSetWindowTitle(s.c_str());
-	FrameCount = 0;
-	glutTimerFunc(1000, timer, 0); //ms, chama a funcao timer, valor irrelevante
-}
-
-void refresh(int value)
-{
-	renderSim();
-	glutTimerFunc(1000 / 60, refresh, 0);
-}
 
 // ------------------------------------------------------------
 //
