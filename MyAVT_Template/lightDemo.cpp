@@ -474,14 +474,43 @@ void obstacleBehaviour() {
 	}
 }
 
+void printTextOnScreen(std::string msg, float xPos, float yPos, float fontSize) {
+
+	glDisable(GL_STENCIL_TEST);
+	glDisable(GL_DEPTH_TEST);
+
+	TextCommand textCmd = { msg, {xPos, yPos}, fontSize };
+
+	//the glyph contains transparent background colors and non-transparent for the actual character pixels. So we use the blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	int m_viewport[4];
+	glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+	//viewer at origin looking down at  negative z direction
+
+	mu.loadIdentity(gmu::MODEL);
+	mu.loadIdentity(gmu::VIEW);
+	mu.pushMatrix(gmu::PROJECTION);
+	mu.loadIdentity(gmu::PROJECTION);
+	mu.ortho(m_viewport[0], m_viewport[0] + m_viewport[2] - 1, m_viewport[1], m_viewport[1] + m_viewport[3] - 1, -1, 1);
+	mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
+	textCmd.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
+	renderer.renderText(textCmd);
+	mu.popMatrix(gmu::PROJECTION);
+	glDisable(GL_BLEND);
+	glEnable(GL_STENCIL_TEST);
+	glEnable(GL_DEPTH_TEST);
+}
+
 void renderSim(void) {
 
 	FrameCount++;
 
-	if (droneFuel > 0.0f)
+	if (droneFuel > 0.0f && !paused)
 		droneFuel -= (consumption + (consumption + 0.1f) * (*drone->localTransform.translation)[1]) / 60.0f; // fuel consumption per second
 
-	if (immuneTimer < immuneTimeAfterCollision)
+	if (immuneTimer < immuneTimeAfterCollision && !paused)
 		immuneTimer += 1.0f / 60.0f;
 	//cout << "Drone Fuel: " << droneFuel << "%" << endl;
 
@@ -528,37 +557,14 @@ void renderSim(void) {
 	//Each glyph quad texture needs just one byte color channel: 0 in background and 1 for the actual character pixels. Use it for alpha blending
 	//text to be rendered in last place to be in front of everything
 	
-	if (fontLoaded && paused) {
-		glDisable(GL_DEPTH_TEST);
+	if (sg.fontLoaded) {
+		
+		if(paused)
+			//all trial and error
+			printTextOnScreen("** PAUSED **", 665.0f/2.0f, 950.0f/2.0f, 0.75f);
 
-		//the glyph contains transparent background colors and non-transparent for the actual character pixels. So we use the blending
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		int m_viewport[4];
-		glGetIntegerv(GL_VIEWPORT, m_viewport);
-
-		//viewer at origin looking down at negative z direction
-
-		mu.loadIdentity(gmu::MODEL);
-		mu.loadIdentity(gmu::VIEW);
-		mu.pushMatrix(gmu::PROJECTION);
-		mu.loadIdentity(gmu::PROJECTION);
-
-		mu.ortho(m_viewport[0], m_viewport[0] + m_viewport[2] - 1, m_viewport[1], m_viewport[1] + m_viewport[3] - 1, -1, 1);
-
-		mu.computeDerivedMatrix(gmu::PROJ_VIEW_MODEL);
-
-		TextCommand textCmd = { "PAUSED", {50.0f, 50.0f} };	// y dis not shown????
-		textCmd.pvm = mu.get(gmu::PROJ_VIEW_MODEL);			// appeared once in rear view mirror, but never again ?!?!?
-
-		renderer.renderText(textCmd);
-
-		mu.popMatrix(gmu::PROJECTION);
-
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-
+		printTextOnScreen("Fuel: " + to_string((int)droneFuel) + "%", 100, 200, 0.5f);
+		printTextOnScreen("Score: " + to_string((int)score), 97, 125, 0.5f);
 	}
 	glutSwapBuffers();
 }
@@ -578,10 +584,8 @@ void timer(int value)
 
 void refresh(int value)
 {
-	if (!paused) {
-		renderSim();
-		glutTimerFunc(1000 / 60, refresh, 0);
-	}
+	renderSim();
+	glutTimerFunc(1000 / 60, refresh, 0);
 }
 
 // ------------------------------------------------------------
@@ -898,7 +902,7 @@ void buildScene()
 
 	//twee
 	tree = sg.AddNode(QUAD, 5, Transform{
-		new vec3{0.0f, 1.5f, 0.0f},
+		new vec3{5.0f, 1.5f, 0.0f},
 		new vec3{2.0f, 2.0f, 2.0f},
 		new vec3{0.0f, 0.0f, 0.0f}
 	});
