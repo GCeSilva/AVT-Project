@@ -20,6 +20,7 @@ in Data {
 	vec3 dirLight;
 	vec3 pointLights[NUMBER_POINT_LIGHTS];
 	vec3 spotLights[NUMBER_SPOT_LIGHTS];
+	vec3 skyboxTexCoord;
 } DataIn;
 
 uniform Materials mat;
@@ -37,6 +38,8 @@ uniform sampler2D normalTex;
 uniform sampler2D treeTex;
 // stone normal
 uniform sampler2D stoneNormalTex;
+// skybox
+uniform samplerCube cubeMap;
 
 uniform int texMode;
 
@@ -164,6 +167,9 @@ void main() {
 		else{
 			color = vec4(max(intensitySum * texelTree + specSum, 0.07 * texelTree).rgb, texelTree.a);
 		}
+	}
+	else if (texMode == 9){
+		color = texture(cubeMap, DataIn.skyboxTexCoord);
 	}
 	else // multitexturing
 	{

@@ -5,6 +5,7 @@
 
 uniform mat4 m_pvm;
 uniform mat4 m_viewModel;
+uniform mat4 m_model;
 uniform mat3 m_normal;
 
 in vec4 position;
@@ -25,6 +26,7 @@ out Data {
 	vec3 dirLight;
 	vec3 pointLights[NUMBER_POINT_LIGHTS];
 	vec3 spotLights[NUMBER_SPOT_LIGHTS];
+	vec3 skyboxTexCoord;
 } DataOut;
 
 uniform bool bumpMapMode;
@@ -45,6 +47,9 @@ void main () {
 
 	DataOut.eye = vec3(-pos);
 	DataOut.eye_default = vec3(-pos);
+
+	DataOut.skyboxTexCoord = vec3(m_model * position);	//Transformação de modelação do cubo unitário 
+	DataOut.skyboxTexCoord.x = - DataOut.skyboxTexCoord.x; //Texturas mapeadas no interior logo negar a coordenada x
 	DataOut.tex_coord = texCoord.st;
 
 	vec3 n, t, b;

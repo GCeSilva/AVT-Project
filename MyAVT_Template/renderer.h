@@ -13,7 +13,7 @@
 
 struct dataMesh {
   int meshID = 0;  //mesh ID in the myMeshes array
-  float *pvm, *vm, *normal;  //matrices pointers
+  float *pvm, *vm, *m, *normal;  //matrices pointers
   int texMode = 0;  //type of shading-> 0:no texturing; 1:modulate diffuse color with texel color; 2:diffuse color is replaced by texel color; 3: multitexturing
 };
 
@@ -66,6 +66,7 @@ public:
   void setBumpMapMode(bool bumpMapMode);
 
   void setTexUnit(int tuId, int texObjId);
+  void setTexUnitCube(int tuId, int texObjId);
 
 
 
@@ -83,7 +84,7 @@ private:
   // Text font rasterizer GLSL program
   GLuint textProgram;
 
-  GLint pvm_loc, vm_loc, normal_loc, lpos_loc, texMode_loc;
+  GLint pvm_loc, vm_loc, m_loc, normal_loc, lpos_loc, texMode_loc;
   GLint tex_loc[MAX_TEXTURES];
 
   //render font GLSL program variable locations and VAO

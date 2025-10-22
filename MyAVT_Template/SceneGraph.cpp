@@ -39,6 +39,11 @@ Node* SceneGraph::AddNode(int meshId, int textureId, Transform localTransform, N
 
 	return newNode;
 }
+Node* SceneGraph::AddNodeSkybox(int meshId, int textureId, Transform localTransform, Node* parent) {
+	skybox = new Node(meshId, textureId, localTransform, parent);
+	skybox->boundingBox = nullptr; //skybox does not need bounding box
+	return skybox;
+}
 AssimpNode* SceneGraph::AddAssimpNode(Mesh meshId, AssimpMeshData data, int textureId, Transform localTransform, Node* parent) {
 
 	AssimpNode* newNode = new AssimpNode(meshId, data, textureId, localTransform, parent);
@@ -112,7 +117,6 @@ void SceneGraph::DrawScene() {
 
 	DrawNode(floor[0], false);
 
-
 	//###########################################################
 	// SHADOW PASS
 	float plane[4] = { 0.0f, 1.0f, 0.0f, 0.0f }; // plane equation y=0
@@ -165,6 +169,16 @@ void SceneGraph::DrawScene() {
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 	glStencilMask(0x00);
 
+	//##########################
+	// skybox
+	glDepthMask(GL_FALSE);
+	glFrontFace(GL_CW);
+
+	SceneGraph::DrawNode(skybox, false);
+
+	glFrontFace(GL_CCW);
+	glDepthMask(GL_TRUE);
+
 	//draw scene
 	SceneGraph::DrawNode(floor[1], false);
 	for each(Node * child in head)
@@ -182,6 +196,16 @@ void SceneGraph::DrawScene() {
 	//stencil bit
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
 	
+	//##########################
+	// skybox
+	glDepthMask(GL_FALSE);
+	glFrontFace(GL_CW);
+
+	SceneGraph::DrawNode(skybox, false);
+
+	glFrontFace(GL_CCW);
+	glDepthMask(GL_TRUE);
+
 	//draw scene
 	SceneGraph::DrawNode(floor[1], false);
 	for each(Node * child in head)
@@ -226,6 +250,7 @@ void SceneGraph::DrawNode(Node* node, bool shadowMode) {
 	else
 		data.texMode = 0;
 
+	data.m = mu.get(gmu::MODEL);
 	data.vm = mu.get(gmu::VIEW_MODEL);
 	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
 	data.normal = mu.getNormalMatrix();
@@ -286,6 +311,7 @@ void SceneGraph::InvDrawNode(Node* node, bool shadowMode) {
 		data.texMode = node->textureId;
 	else
 		data.texMode = 0;
+	data.m = mu.get(gmu::MODEL);
 	data.vm = mu.get(gmu::VIEW_MODEL);
 	data.pvm = mu.get(gmu::PROJ_VIEW_MODEL);
 	data.normal = mu.getNormalMatrix();

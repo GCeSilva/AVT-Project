@@ -149,6 +149,7 @@ bool Renderer::setRenderMeshesShaderProg(const std::string& vertShaderPath, cons
 
     pvm_loc     = glGetUniformLocation(program, "m_pvm");
     vm_loc      = glGetUniformLocation(program, "m_viewModel");
+	m_loc       = glGetUniformLocation(program, "m_model");
     normal_loc  = glGetUniformLocation(program, "m_normal");
     texMode_loc = glGetUniformLocation(program, "texMode");     // different modes of texturing
 
@@ -166,7 +167,12 @@ bool Renderer::setRenderMeshesShaderProg(const std::string& vertShaderPath, cons
 
     //billboard tree
     tex_loc[7] = glGetUniformLocation(program, "treeTex");
-	tex_loc[8] = glGetUniformLocation(program, "stoneNormalTex");
+	
+	// bump map stone
+    tex_loc[8] = glGetUniformLocation(program, "stoneNormalTex");
+
+	// cube map
+	tex_loc[9] = glGetUniformLocation(program, "cubeMap");
 
 
     return(shader.isProgramLinked() && shader.isProgramValid());
@@ -316,10 +322,17 @@ void Renderer::setTexUnit(int tuId, int texObjId) {
     glUniform1i(tex_loc[tuId], tuId);
 }
 
+void Renderer::setTexUnitCube(int tuId, int texObjId) {
+    glActiveTexture(GL_TEXTURE0 + tuId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, TexObjArray.getTextureId(texObjId));
+    glUniform1i(tex_loc[tuId], tuId);
+}
+
 void Renderer::renderMesh(const dataMesh& data) {
     GLint loc;
 
     // be aware to activate previously the Model shader program
+    glUniformMatrix4fv(m_loc, 1, GL_FALSE, data.m);
     glUniformMatrix4fv(vm_loc, 1, GL_FALSE, data.vm);
     glUniformMatrix4fv(pvm_loc, 1, GL_FALSE, data.pvm);
     glUniformMatrix3fv(normal_loc, 1, GL_FALSE, data.normal);

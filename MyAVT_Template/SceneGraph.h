@@ -41,6 +41,7 @@ public:
 
 	void RemoveNode(Node* node);
 	Node* AddNode(int meshId, int textureId, Transform localTransform, Node* parent = nullptr);
+	Node* AddNodeSkybox(int meshId, int textureId, Transform localTransform, Node* parent = nullptr);
 	AssimpNode* AddAssimpNode(Mesh meshId, AssimpMeshData data, int textureId, Transform localTransform, Node* parent = nullptr);
 	void AddFloor(int meshId, int textureId, Transform localTransform, int pos);
 
@@ -60,6 +61,8 @@ private:
 	std::list<LightNode*> lights;
 
 	std::array<Node*, 2> floor;
+
+	Node* skybox;
 
 	void CalculateLights();
 };

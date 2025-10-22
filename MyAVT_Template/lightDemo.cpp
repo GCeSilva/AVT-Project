@@ -107,6 +107,16 @@ float coneDir[NUM_SPOT_LIGHTS][4] = {
 float cutOff[NUM_SPOT_LIGHTS] = { 0.93f, 0.93f };
 bool spotLightMode = false;
 
+const char* cubeMapFilenames[] = { 
+	"assets/cubemap/posx.jpg", 
+	"assets/cubemap/negx.jpg", 
+	"assets/cubemap/posy.jpg", 
+	"assets/cubemap/negy.jpg", 
+	"assets/cubemap/posz.jpg", 
+	"assets/cubemap/negz.jpg" 
+};
+
+
 bool fogMode = true;
 bool bumpMapMode = true;
 
@@ -491,7 +501,11 @@ void renderSim(void) {
 	renderer.setTexUnit(6, 6);
 
 	renderer.setTexUnit(7, 7);
+	// bump map
 	renderer.setTexUnit(8, 8);
+	// cube map
+	renderer.setTexUnitCube(9, 9);
+
 
 	// load identity matrices
 	sg.InitializeSceneGraph();
@@ -778,6 +792,7 @@ void buildScene()
 	renderer.TexObjArray.texture2D_Loader("assets/tree.png");
 
 	renderer.TexObjArray.texture2D_Loader("assets/normal.tga");
+	renderer.TexObjArray.textureCubeMap_Loader(cubeMapFilenames);
 
 
 	//Scene geometry with triangle meshes
@@ -825,6 +840,13 @@ void buildScene()
 		new vec3{ 1.0f, 1.0f ,1.0f},
 		new vec3{ 0.0f, 0.0f ,180.0f},
 	});*/	
+
+	// skybox
+	sg.AddNodeSkybox(CUBE, 9, Transform{
+		new vec3{-0.5f, -0.5f, -0.5f},
+		new vec3{1000.0f, 1000.0f, 1000.0f},
+		new vec3{0.0f, 0.0f, 0.0f}
+	});
 
 	//floor
 	sg.AddFloor(QUADTRANS, 0, objectTransforms[FLOOR], 0);
