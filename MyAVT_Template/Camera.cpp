@@ -99,13 +99,13 @@ void Camera::RenderFollow() {
 	float parentRot[3] = { 0.0f, 0.0f, 0.0f };
 	Node* tempParent = parent;
 	while (tempParent != nullptr) {
-		parentPos[0] = (*parent->localTransform.translation)[0];
-		parentPos[1] = (*parent->localTransform.translation)[1];
-		parentPos[2] = (*parent->localTransform.translation)[2];
+		parentPos[0] = (*tempParent->localTransform.translation)[0];
+		parentPos[1] = (*tempParent->localTransform.translation)[1];
+		parentPos[2] = (*tempParent->localTransform.translation)[2];
 
-		parentRot[0] = (*parent->localTransform.rotation)[0];
-		parentRot[1] = (*parent->localTransform.rotation)[1];
-		parentRot[2] = (*parent->localTransform.rotation)[2];
+		parentRot[0] = (*tempParent->localTransform.rotation)[0];
+		parentRot[1] = (*tempParent->localTransform.rotation)[1];
+		parentRot[2] = (*tempParent->localTransform.rotation)[2];
 
 		tempParent = tempParent->GetParent();
 	}

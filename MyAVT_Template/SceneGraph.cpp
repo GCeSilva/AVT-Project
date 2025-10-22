@@ -80,87 +80,104 @@ void SceneGraph::DrawScene() {
 	//Cameras
 	activeCamera->RenderCamera();
 
-	//##########################
-	// Planar Reflextions
+	//put the correct calculation of height here
+	Node* tempParent = activeCamera->GetParent();
+	float parentPos[3] = { 0.0f, 0.0f, 0.0f };
+	while (tempParent != nullptr) {
+		parentPos[0] = (*tempParent->localTransform.translation)[0];
+		parentPos[1] = (*tempParent->localTransform.translation)[1];
+		parentPos[2] = (*tempParent->localTransform.translation)[2];
 
-	glStencilFunc(GL_NEVER, 0x2, 0xFF);
-	glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
-	glStencilMask(0xFF);
-
-	DrawNode(floor[0], false);
-
-	glStencilFunc(GL_EQUAL, 0x2, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-	//stop writing to stencil mask
-	glStencilMask(0x00);
-
-	for each(LightNode * light in lights) {
-		light->position[1] = -light->position[1];
+		tempParent = tempParent->GetParent();
 	}
-	CalculateLights();
+	float camY = activeCamera->radious * sin(activeCamera->localRotation[0] * 3.14f / 180.0f);
 
-	glCullFace(GL_FRONT);
-	for each(Node * child in head)
+	camY += parentPos[1];
+
+	if(camY > 0)
 	{
-		SceneGraph::InvDrawNode(child, false);
-	}
-	glCullFace(GL_BACK);
+		//##########################
+		// Planar Reflextions
 
-	//revert lights
-	for each(LightNode * light in lights) {
-		light->position[1] = -light->position[1];
-	}
-	CalculateLights();
+		glStencilFunc(GL_NEVER, 0x2, 0xFF);
+		glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
+		glStencilMask(0xFF);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);		// Blend specular floor with reflected geometry
+		DrawNode(floor[0], false);
 
-	DrawNode(floor[0], false);
+		glStencilFunc(GL_EQUAL, 0x2, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		//stop writing to stencil mask
+		glStencilMask(0x00);
 
-	//###########################################################
-	// SHADOW PASS
-	float plane[4] = { 0.0f, 1.0f, 0.0f, 0.0f }; // plane equation y=0
-	glDepthMask(GL_FALSE);
-	//Dark the color stored in color buffer
-	glBlendFunc(GL_DST_COLOR, GL_ZERO);
+		for each(LightNode * light in lights) {
+			light->position[1] = -light->position[1];
+		}
+		CalculateLights();
 
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(-0.5f, -0.5f);
-
-	float mat[16];
-	for each(LightNode* light in lights) {
-
-		//skip non active light types
-		if(light->GetType() == "PointLight" && !pointLightMode)
-			continue;
-		else if(light->GetType() == "SpotLight" && !spotLightMode)
-			continue;
-		else if(light->GetType() == "DirectionalLight" && !directionalLightMode)
-			continue;
-
-		//spotlight does not work, probably since it uses diferent logic from every other light
-		//need to ask later about it
-		mu.shadow_matrix(
-			mat,
-			plane,
-			light->position  // light position
-		);
-
-	
-		mu.pushMatrix(gmu::MODEL);
-		mu.multMatrix(gmu::MODEL, mat);
-
+		glCullFace(GL_FRONT);
 		for each(Node * child in head)
 		{
-			SceneGraph::InvDrawNode(child, true);
+			SceneGraph::InvDrawNode(child, false);
 		}
-		mu.popMatrix(gmu::MODEL);
+		glCullFace(GL_BACK);
+
+		//revert lights
+		for each(LightNode * light in lights) {
+			light->position[1] = -light->position[1];
+		}
+		CalculateLights();
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);		// Blend specular floor with reflected geometry
+
+		DrawNode(floor[0], false);
+
+		//###########################################################
+		// SHADOW PASS
+		float plane[4] = { 0.0f, 1.0f, 0.0f, 0.0f }; // plane equation y=0
+		glDepthMask(GL_FALSE);
+		//Dark the color stored in color buffer
+		glBlendFunc(GL_DST_COLOR, GL_ZERO);
+
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(-0.5f, -0.5f);
+
+		float mat[16];
+		for each(LightNode * light in lights) {
+
+			//skip non active light types
+			if (light->GetType() == "PointLight" && !pointLightMode)
+				continue;
+			else if (light->GetType() == "SpotLight" && !spotLightMode)
+				continue;
+			else if (light->GetType() == "DirectionalLight" && !directionalLightMode)
+				continue;
+
+			//spotlight does not work, probably since it uses diferent logic from every other light
+			//need to ask later about it
+			mu.shadow_matrix(
+				mat,
+				plane,
+				light->position  // light position
+			);
+
+
+			mu.pushMatrix(gmu::MODEL);
+			mu.multMatrix(gmu::MODEL, mat);
+
+			for each(Node * child in head)
+			{
+				SceneGraph::InvDrawNode(child, true);
+			}
+			mu.popMatrix(gmu::MODEL);
+		}
+
+
+		glDisable(GL_POLYGON_OFFSET_FILL);
+		glDepthMask(GL_TRUE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
-	
-	
-	glDisable(GL_POLYGON_OFFSET_FILL);
-	glDepthMask(GL_TRUE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//##########################
 	//Normal draw

@@ -44,7 +44,7 @@ std::unordered_map<Objects, Transform> objectTransforms = {
 		nullptr
 	}},
 	{ DRONEBODY, {
-		new vec3 { -5.0f, 3.0f, 0.0f },
+		new vec3 { 0.0f, 3.0f, 0.0f },
 		new vec3 { 1.0f, 0.4f, 0.6f },
 		new vec3 { 0.0f, 0.0f, 0.0f }
 	}},
