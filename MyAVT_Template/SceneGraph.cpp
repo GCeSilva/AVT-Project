@@ -207,8 +207,6 @@ void SceneGraph::DrawScene() {
 
 	//part drawn on stencil
 	activeCamera->invCamera();
-	//Lights
-	CalculateLights();
 
 	//stencil bit
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
